@@ -1,20 +1,18 @@
 package ru.practicum.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.EndpointHit;
-import ru.practicum.ViewStats;
+import ru.practicum.dto.EndpointHit;
+import ru.practicum.dto.ViewStats;
 import ru.practicum.service.StatsService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
 
 @Validated
 @RestController
-@RequestMapping(path = "")
 @Slf4j
 public class StatsController {
     private StatsService statsService;
@@ -24,10 +22,8 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addStats(@Valid @RequestBody EndpointHit inputDto,
-                         @PathVariable HttpServletRequest request) {   // или валидация в мейн сервисе?
+    public void addStats(@RequestBody EndpointHit inputDto) {
         log.info("Add new statistic for ip {} - Started", inputDto.getIp());
-
         statsService.addStats(inputDto);
     }
 
@@ -35,9 +31,8 @@ public class StatsController {
     public ViewStats[] viewStatistics(@RequestParam String start,  //(в формате "yyyy-MM-dd HH:mm:ss")
                                       @RequestParam String end,
                                       @RequestParam(required = false) String[] uris,
-                                      @RequestParam(name = "unique", defaultValue = "false") boolean unique,
-                                      @PathVariable HttpServletRequest request){
-        log.info("client ip: {}", request.getRemoteAddr());
+                                      @RequestParam(name = "unique", defaultValue = "false") boolean unique){
+        log.info("viewStatistics: STARTED");
         return statsService.viewStatistics(start, end, uris, unique);
     }
 

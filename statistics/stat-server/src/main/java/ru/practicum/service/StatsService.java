@@ -1,28 +1,25 @@
 package ru.practicum.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.EndpointHit;
-import ru.practicum.ViewStats;
+import ru.practicum.dto.EndpointHit;
+import ru.practicum.dto.ViewStats;
+import ru.practicum.mapper.StatManualMapper;
+import ru.practicum.repo.StatsRepo;
 
 @Service
+@AllArgsConstructor
 public class StatsService {
+    private StatsRepo statsRepo;
+
     public void addStats(EndpointHit inputDto) {
-
-//{
-        //  "app": "ewm-main-service",
-        //  "uri": "/events/1",
-        //  "ip": "192.163.0.1",
-        //  "timestamp": "2022-09-06 11:00:23"
-        //}
-
+        statsRepo.save(StatManualMapper.makeEntity(inputDto));
     }
 
     public ViewStats[] viewStatistics(String start, String end, String[] uris, boolean unique) {
         return new ViewStats[0];
     }
 }
-
-
 //    [
 //    {
 //        "app": "ewm-main-service",

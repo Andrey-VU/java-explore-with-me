@@ -1,12 +1,13 @@
 package ru.practicum.mapper;
 
 import lombok.NoArgsConstructor;
-import ru.practicum.EndpointHit;
-import ru.practicum.ViewStats;
+import ru.practicum.dto.EndpointHit;
 import ru.practicum.model.StatEntity;
+import ru.practicum.dto.ViewStats;
+
 
 @NoArgsConstructor
-public class StatManualMapper {
+public final class StatManualMapper {
 
     public static StatEntity makeEntity(EndpointHit inputDto){
         StatEntity statEntity = new StatEntity();

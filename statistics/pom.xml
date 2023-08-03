@@ -11,6 +11,20 @@
 
     <artifactId>statistics</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>8.0.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
     <packaging>pom</packaging>
     <modules>
         <module>stat-dto</module>
