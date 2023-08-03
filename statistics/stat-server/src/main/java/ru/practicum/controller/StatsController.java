@@ -9,6 +9,7 @@ import ru.practicum.EndpointHit;
 import ru.practicum.ViewStats;
 import ru.practicum.service.StatsService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @Validated
@@ -23,8 +24,10 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addStats(@Valid @RequestBody EndpointHit inputDto) {   // или валидация в мейн сервисе?
-        log.info("Add new statistic for ip  - Started", inputDto.getIp());
+    public void addStats(@Valid @RequestBody EndpointHit inputDto,
+                         @PathVariable HttpServletRequest request) {   // или валидация в мейн сервисе?
+        log.info("Add new statistic for ip {} - Started", inputDto.getIp());
+
         statsService.addStats(inputDto);
     }
 
@@ -32,7 +35,9 @@ public class StatsController {
     public ViewStats[] viewStatistics(@RequestParam String start,  //(в формате "yyyy-MM-dd HH:mm:ss")
                                       @RequestParam String end,
                                       @RequestParam(required = false) String[] uris,
-                                      @RequestParam(name = "unique", defaultValue = "false") boolean unique){
+                                      @RequestParam(name = "unique", defaultValue = "false") boolean unique,
+                                      @PathVariable HttpServletRequest request){
+        log.info("client ip: {}", request.getRemoteAddr());
         return statsService.viewStatistics(start, end, uris, unique);
     }
 

@@ -1,17 +1,19 @@
-package ru.practicum;
+package ru.practicum.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotBlank;
 
 @EqualsAndHashCode
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class EndpointHit {
+public class EndpointHitClient {
+    @NotBlank
     private String app;
+    @NotBlank
     private String uri;
+    @NotBlank
     private String ip;
+    @NotBlank
     private String timestamp;
 }

@@ -1,8 +1,10 @@
 package ru.practicum.service;
 
+import org.springframework.stereotype.Service;
 import ru.practicum.EndpointHit;
 import ru.practicum.ViewStats;
 
+@Service
 public class StatsService {
     public void addStats(EndpointHit inputDto) {
 
@@ -16,7 +18,9 @@ public class StatsService {
     }
 
     public ViewStats[] viewStatistics(String start, String end, String[] uris, boolean unique) {
-
+        return new ViewStats[0];
+    }
+}
 
 
 //    [
@@ -27,7 +31,3 @@ public class StatsService {
 //    }
 //]
 
-    }
-
-
-}
