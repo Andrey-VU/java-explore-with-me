@@ -23,22 +23,16 @@ public class StatsServiceImpl implements StatsService{
 
     @Override
     public List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        validateDate(start, end);
+        validateInterval(start, end);
+        if (unique == false && uris.equals(null)) {
+            return statsRepo.viewAllStatistics(start, end);
+        } else return null;
 
-
-
-        return null;
     }
 
-    private void validateDate(LocalDateTime start, LocalDateTime end) {
+    private void validateInterval(LocalDateTime start, LocalDateTime end) {
         if (!start.isBefore(end)) {
             throw new ValidationException("Начало интервала должно быть раньше его завершения!");
-        }
-        if (start.equals(null)) {
-            throw new ValidationException("Начало интервала не может быть пустым!");
-        }
-        if (end.equals(null)) {
-            throw new ValidationException("Конец интервала не может быть пустым!");
         }
     }
 }

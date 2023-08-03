@@ -10,6 +10,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.service.StatsServiceImpl;
 
+import java.time.LocalDateTime;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,7 +31,7 @@ class StatsControllerTest {
        EndpointHit incomeDtoToCreate = new EndpointHit("ewm-main-service",
                "/events/1",
                "192.163.0.1",
-               "2022-09-06 11:00:23");
+               LocalDateTime.now());
 
        String result = mockMvc.perform(post("/hit")
                        .contentType("application/json")
@@ -39,12 +41,5 @@ class StatsControllerTest {
                .getResponse()
                .getContentAsString();
 }
-
-//    @Test
-//    @SneakyThrows
-//    void get_whenCorrect_thenReturn200() {
-//        mockMvc.perform(get("/stats"))
-//                .andExpect(status().isOk());
-//    }
 
 }

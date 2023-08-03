@@ -2,6 +2,7 @@ package ru.practicum.mapper;
 
 import lombok.NoArgsConstructor;
 import ru.practicum.dto.EndpointHit;
+import ru.practicum.dto.ViewStats;
 import ru.practicum.model.StatEntity;
 
 @NoArgsConstructor
@@ -16,5 +17,8 @@ public final class StatManualMapper {
         return statEntity;
     }
 
+    public static ViewStats makeDto(StatEntity statEntity) {
+        return null;
+    }
 }
 

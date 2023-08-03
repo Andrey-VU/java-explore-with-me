@@ -1,6 +1,7 @@
 package ru.practicum.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +29,8 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<ViewStats> viewStatistics(@RequestParam LocalDateTime start,
-                                          @RequestParam LocalDateTime end,
+    public List<ViewStats> viewStatistics(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")  LocalDateTime start,
+                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")  LocalDateTime end,
                                           @RequestParam(required = false) List<String> uris,
                                           @RequestParam(name = "unique", defaultValue = "false") boolean unique){
         log.info("STARTs viewing statistics with parameters: \n start {}, \n end {}, \n uris {}, \n unique {}",
