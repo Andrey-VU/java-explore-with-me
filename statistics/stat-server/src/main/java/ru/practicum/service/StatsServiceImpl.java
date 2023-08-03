@@ -17,7 +17,7 @@ public class StatsService {
     }
 
     public ViewStats[] viewStatistics(String start, String end, String[] uris, boolean unique) {
-        return new ViewStats[0];
+        return statsRepo.findStats(start, end, uris, unique);
     }
 }
 //    [
