@@ -4,27 +4,41 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.mapper.StatManualMapper;
 import ru.practicum.repo.StatsRepo;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @AllArgsConstructor
-public class StatsService {
+public class StatsServiceImpl implements StatsService{
     private StatsRepo statsRepo;
 
+    @Override
     public void addStats(EndpointHit inputDto) {
         statsRepo.save(StatManualMapper.makeEntity(inputDto));
     }
 
-    public ViewStats[] viewStatistics(String start, String end, String[] uris, boolean unique) {
-        return statsRepo.findStats(start, end, uris, unique);
+    @Override
+    public List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+        validateDate(start, end);
+
+
+
+        return null;
+    }
+
+    private void validateDate(LocalDateTime start, LocalDateTime end) {
+        if (!start.isBefore(end)) {
+            throw new ValidationException("Начало интервала должно быть раньше его завершения!");
+        }
+        if (start.equals(null)) {
+            throw new ValidationException("Начало интервала не может быть пустым!");
+        }
+        if (end.equals(null)) {
+            throw new ValidationException("Конец интервала не может быть пустым!");
+        }
     }
 }
-//    [
-//    {
-//        "app": "ewm-main-service",
-//            "uri": "/events/1",
-//            "hits": 6
-//    }
-//]
-

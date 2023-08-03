@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,6 +23,7 @@ public class StatEntity {
     private String uri;
     @Column(name = "ip")
     private String ip;
+
     @Column(name = "date_time")
-    private String timestamp;
+    private LocalDateTime timestamp;
 }
