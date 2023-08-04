@@ -5,8 +5,9 @@ import ru.practicum.dto.ViewStats;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public interface StatsService {
     void addStats(EndpointHit inputDto);
-    List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique);
+    List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, Set<String> uris, boolean unique);
 }

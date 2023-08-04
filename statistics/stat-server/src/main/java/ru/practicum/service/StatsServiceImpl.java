@@ -10,6 +10,7 @@ import ru.practicum.repo.StatsRepo;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -22,12 +23,19 @@ public class StatsServiceImpl implements StatsService{
     }
 
     @Override
-    public List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+    public List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, Set<String> uris, boolean unique) {
         validateInterval(start, end);
-        if (unique == false && uris.equals(null)) {
-            return statsRepo.viewAllStatistics(start, end);
-        } else return null;
-
+        if (unique) {
+            if (uris == null || uris.isEmpty()) {
+                return statsRepo.viewStatisticsUniqueIP(start, end);
+            } else return statsRepo.viewStatisticsUniqueIPWithUris(start, end, uris);
+        } else {
+            if (uris == null || uris.isEmpty()) {
+                return statsRepo.viewAllStatistics(start, end);
+            } else {
+                return statsRepo.viewAllStatisticsWithUris(start, end, uris);
+            }
+        }
     }
 
     private void validateInterval(LocalDateTime start, LocalDateTime end) {
