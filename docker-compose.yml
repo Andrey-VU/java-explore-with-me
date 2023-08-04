@@ -9,7 +9,7 @@ services:
     depends_on:
       - stats-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://statsdb:5432/statsdb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/statsdb
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
 
@@ -33,7 +33,7 @@ services:
       - stats-server
     environment:
       - STATS_SERVER_URL=http://stats-server:9090
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://maindb:5432/maindb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://main-db:5432/maindb
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
 
