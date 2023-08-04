@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
 
-  ewm-service:
+  main-service:
     build: ./main-service
     container_name: ewm-service
     ports:
@@ -33,13 +33,13 @@ services:
       - stats-server
     environment:
       - STATS_SERVER_URL=http://stats-server:9090
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewmdb:5432/ewmdb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://maindb:5432/maindb
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
 
-  ewm-db:
+  main-db:
     image: postgres:15.3-alpine3.18
-    container_name: ewm-db
+    container_name: main-db
     ports:
       - "6542:5432"
     environment:
