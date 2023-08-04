@@ -14,7 +14,7 @@ services:
       - POSTGRES_PASSWORD=test
 
   stats-db:
-    image: postgres:15.3-alpine3.18
+    image: postgres:13.7-alpine
     container_name: stats-db
     ports:
       - "6541:5432"
@@ -25,11 +25,11 @@ services:
 
   main-service:
     build: ./main-service
-    container_name: ewm-service
+    container_name: main-service
     ports:
       - "8080:8080"
     depends_on:
-      - ewm-db
+      - main-db
       - stats-server
     environment:
       - STATS_SERVER_URL=http://stats-server:9090
@@ -38,7 +38,7 @@ services:
       - POSTGRES_PASSWORD=test
 
   main-db:
-    image: postgres:15.3-alpine3.18
+    image: postgres:13.7-alpine
     container_name: main-db
     ports:
       - "6542:5432"
