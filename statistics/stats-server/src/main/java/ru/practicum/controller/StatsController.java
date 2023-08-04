@@ -16,6 +16,7 @@ import java.util.Set;
 @Slf4j
 public class StatsController {
     private StatsServiceImpl statsServiceImpl;
+
     public StatsController(StatsServiceImpl statsServiceImpl) {
         this.statsServiceImpl = statsServiceImpl;
     }
@@ -28,12 +29,13 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<ViewStats> viewStatistics(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
-                                          @RequestParam(required = false, name = "uris") Set<String> uris,
-                                          @RequestParam(defaultValue = "false", name = "unique") boolean unique){
+    public List<ViewStats> viewStatistics(
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+        @RequestParam(required = false, name = "uris") Set<String> uris,
+        @RequestParam(defaultValue = "false", name = "unique") boolean unique) {
         log.info("STARTs viewing statistics with parameters: \n start {}, \n end {}, \n uris {}, \n unique {}",
-                start, end, uris, unique );
+            start, end, uris, unique);
         return statsServiceImpl.viewStatistics(start, end, uris, unique);
     }
 }

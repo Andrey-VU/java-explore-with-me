@@ -14,7 +14,7 @@ import java.util.Set;
 
 @Service
 @AllArgsConstructor
-public class StatsServiceImpl implements StatsService{
+public class StatsServiceImpl implements StatsService {
     private StatsRepo statsRepo;
 
     @Override

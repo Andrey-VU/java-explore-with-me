@@ -12,7 +12,6 @@ import ru.practicum.service.StatsServiceImpl;
 
 import java.time.LocalDateTime;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,18 +27,18 @@ class StatsControllerTest {
     @Test
     @SneakyThrows
     void post_whenCorrect_thenReturn201() {
-       EndpointHit incomeDtoToCreate = new EndpointHit("ewm-main-service",
-               "/events/1",
-               "192.163.0.1",
-               LocalDateTime.now());
+        EndpointHit incomeDtoToCreate = new EndpointHit("ewm-main-service",
+            "/events/1",
+            "192.163.0.1",
+            LocalDateTime.now());
 
-       String result = mockMvc.perform(post("/hit")
-                       .contentType("application/json")
-                       .content(objectMapper.writeValueAsString(incomeDtoToCreate)))
-               .andExpect(status().isCreated())
-               .andReturn()
-               .getResponse()
-               .getContentAsString();
-}
+        String result = mockMvc.perform(post("/hit")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(incomeDtoToCreate)))
+            .andExpect(status().isCreated())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    }
 
 }

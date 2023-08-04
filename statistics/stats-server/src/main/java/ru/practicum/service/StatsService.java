@@ -9,5 +9,6 @@ import java.util.Set;
 
 public interface StatsService {
     void addStats(EndpointHit inputDto);
+
     List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, Set<String> uris, boolean unique);
 }

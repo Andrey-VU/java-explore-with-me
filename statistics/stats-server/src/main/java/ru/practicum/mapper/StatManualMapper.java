@@ -8,7 +8,7 @@ import ru.practicum.model.StatEntity;
 @NoArgsConstructor
 public final class StatManualMapper {
 
-    public static StatEntity makeEntity(EndpointHit inputDto){
+    public static StatEntity makeEntity(EndpointHit inputDto) {
         StatEntity statEntity = new StatEntity();
         statEntity.setApp(inputDto.getApp());
         statEntity.setIp(inputDto.getIp());
