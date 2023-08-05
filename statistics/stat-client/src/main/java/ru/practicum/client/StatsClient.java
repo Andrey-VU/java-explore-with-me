@@ -73,4 +73,3 @@ public class StatsClient extends BaseClient {
         }
     }
 }
-
