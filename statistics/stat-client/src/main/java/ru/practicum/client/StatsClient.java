@@ -18,6 +18,8 @@ import java.util.Set;
 @Slf4j
 public class StatsClient extends BaseClient {
 
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Autowired
     public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
@@ -51,8 +53,8 @@ public class StatsClient extends BaseClient {
 
         StringBuilder uriBuilder = new StringBuilder("/stats" + "?start={start}&end={end}");
         Map<String, Object> parameters = Map.of(
-            "start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-            "end", end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            "start", start.format(DATE_TIME_FORMATTER),
+            "end", end.format(DATE_TIME_FORMATTER)
         );
 
         if (uris != null && !uris.isEmpty()) {

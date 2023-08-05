@@ -1,9 +1,11 @@
 package ru.practicum.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode
 @Getter
@@ -15,5 +17,6 @@ public class EndpointHitClient {
     @NotBlank
     private String ip;
     @NotBlank
-    private String timestamp;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime timestamp;
 }
