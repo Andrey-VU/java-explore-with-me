@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.mapper.StatManualMapper;
+import ru.practicum.mapper.StatsMapper;
 import ru.practicum.repo.StatsRepo;
 
 import java.time.LocalDateTime;
@@ -16,10 +16,11 @@ import java.util.Set;
 @AllArgsConstructor
 public class StatsServiceImpl implements StatsService {
     private StatsRepo statsRepo;
+    private StatsMapper statsMapper;
 
     @Override
     public void addStats(EndpointHit inputDto) {
-        statsRepo.save(StatManualMapper.makeEntity(inputDto));
+        statsRepo.save(statsMapper.makeEntity(inputDto));
     }
 
     @Override
