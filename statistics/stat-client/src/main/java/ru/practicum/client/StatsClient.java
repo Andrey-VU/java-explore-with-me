@@ -7,7 +7,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.dto.EndpointHitClient;
+import ru.practicum.dto.EndpointHit;
 import ru.practicum.exception.ValidationException;
 
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public void addStats(EndpointHitClient inputDto) {
+    public void addStats(EndpointHit inputDto) {
         log.info("StatsClient addStats: STARTED");
         post("/hit", inputDto);
     }
