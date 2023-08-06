@@ -7,7 +7,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.dto.EndpointHitClient;
+import ru.practicum.dto.EndpointHit;
 import ru.practicum.exception.ValidationException;
 
 import java.time.LocalDateTime;
@@ -18,8 +18,10 @@ import java.util.Set;
 @Slf4j
 public class StatsClient extends BaseClient {
 
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Autowired
-    public StatsClient(@Value("http://localhost:9090") String serverUrl, RestTemplateBuilder builder) {
+    public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
             builder
                 .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
@@ -28,7 +30,7 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public void addStats(EndpointHitClient inputDto) {
+    public void addStats(EndpointHit inputDto) {
         log.info("StatsClient addStats: STARTED");
         post("/hit", inputDto);
     }
@@ -51,8 +53,8 @@ public class StatsClient extends BaseClient {
 
         StringBuilder uriBuilder = new StringBuilder("/stats" + "?start={start}&end={end}");
         Map<String, Object> parameters = Map.of(
-            "start", start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-            "end", end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            "start", start.format(DATE_TIME_FORMATTER),
+            "end", end.format(DATE_TIME_FORMATTER)
         );
 
         if (uris != null && !uris.isEmpty()) {
@@ -73,4 +75,3 @@ public class StatsClient extends BaseClient {
         }
     }
 }
-
