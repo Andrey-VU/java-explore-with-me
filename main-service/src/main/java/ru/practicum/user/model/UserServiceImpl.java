@@ -1,14 +1,17 @@
 package ru.practicum.user.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
-import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.mapper.UserMapperImpl;
 import ru.practicum.user.repo.UserRepo;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -20,21 +23,32 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserDto create(NewUserRequest newUserRequest) {
         User user = userRepo.save(userMapper.makeUser(newUserRequest));
+        log.info("User {} was saved in repo", user);
         return userMapper.makeDto(user);
     }
 
     @Override
-    public UserDto activate(UserDto userDto) {
-        return null;
+    public void delete(Long id) {
+        log.info("User id {} delete: STARTED", id);
+        userRepo.deleteById(id);
     }
 
     @Override
-    public UserDto read(UserShortDto userShortDto) {
-        return null;
-    }
+    public List<UserDto> getUsers(List<Long> ids, int size, int from) {
+        List<UserDto> usersDto = new ArrayList<>();
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
 
-    @Override
-    public void delete(UserShortDto userShortDto) {
+        if (ids == null || ids.size() == 0) {
+            usersDto = userRepo.findAll(pageRequest).stream()
+                .map(user -> userMapper.makeDto(user))
+                .collect(Collectors.toList());
+        } else {
+            usersDto = userRepo.findAllByIdIn(ids, pageRequest).stream()
+                .map(user -> userMapper.makeDto(user))
+                .collect(Collectors.toList());
+        }
 
+        log.info("{} users was found", usersDto.size());
+        return usersDto;
     }
 }
