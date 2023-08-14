@@ -1,18 +1,17 @@
-package ru.practicum.categories.model;
+package ru.practicum.category.model;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.categories.dto.CategoryDto;
-import ru.practicum.categories.dto.NewCategoryDto;
-import ru.practicum.categories.mapper.CategoryMapperImpl;
-import ru.practicum.categories.repo.CategoryRepo;
+import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.category.dto.NewCategoryDto;
+import ru.practicum.category.mapper.CategoryMapperImpl;
+import ru.practicum.category.repo.CategoryRepo;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
