@@ -2,13 +2,18 @@ package ru.practicum.categories.model;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.categories.dto.CategoryDto;
 import ru.practicum.categories.dto.NewCategoryDto;
 import ru.practicum.categories.mapper.CategoryMapperImpl;
 import ru.practicum.categories.repo.CategoryRepo;
+import ru.practicum.exception.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -54,18 +59,27 @@ public class CategoryServiceImpl implements CategoryService{
 
     @Override
     public List<CategoryDto> getPublic(int from, int size) {
-        //// В случае, если по заданным фильтрам не найдено ни одной категории, возвращает пустой список
-
-        return null;
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        categoryDtos = categoryRepo.findAll(pageRequest).stream()
+            .map(category -> categoryMapper.makeDto(category))
+            .collect(Collectors.toList());
+        log.info("{} categories are found", categoryDtos.size());
+        return categoryDtos;
     }
 
     @Override
     public CategoryDto getPublic(Long catId) {
-        return null;
+        Category category = categoryRepo.findById(catId)
+            .orElseThrow(() -> new NotFoundException("КАТЕГОРИЯ id "
+            + catId + " не найдена"));
+
+        log.info("Category {} is found", category.getName());
+        return categoryMapper.makeDto(category);
     }
 
     private boolean isConnectedWithEvent(Long id) {
-        return true;
+        return false;
     }
 //    ТРЕБУЕТСЯ ДОРАБОТКА МЕТОДА
 }

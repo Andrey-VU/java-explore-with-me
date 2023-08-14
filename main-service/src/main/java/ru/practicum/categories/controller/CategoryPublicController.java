@@ -3,10 +3,7 @@ package ru.practicum.categories.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.categories.dto.CategoryDto;
 import ru.practicum.categories.model.CategoryService;
 
@@ -29,7 +26,8 @@ public class CategoryPublicController {
         return categoryService.getPublic(from, size);
     }
 
-    @GetMapping CategoryDto getCategory(Long catId){
+    @GetMapping("/{catId}")
+    CategoryDto getCategory(@Positive @PathVariable Long catId){
         log.info("STARTED getting a Category with id {}", catId);
         return categoryService.getPublic(catId);
     }

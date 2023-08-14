@@ -9,14 +9,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler(value = {ValidationException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final RuntimeException e) {
-        log.debug("Получен статус 400 Bad Request {}", e.getMessage(), e);
-        return new ErrorResponse(
-            e.getMessage()
-        );
-    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -27,4 +19,11 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler(value = {NotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(final RuntimeException e) {
+        return new ErrorResponse(
+            e.getMessage()
+        );
+    }
 }

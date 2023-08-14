@@ -47,6 +47,4 @@ public class UserAdminController {
         log.info("deleteUser: {} userId - STARTED", userId);
         userService.delete(userId);
         }
-
-
 }
