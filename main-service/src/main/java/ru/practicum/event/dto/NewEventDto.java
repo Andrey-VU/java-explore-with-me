@@ -2,7 +2,7 @@ package ru.practicum.event.dto;
 
 import lombok.Data;
 import ru.practicum.category.dto.CategoryDto;
-import ru.practicum.event.location.Location;
+import ru.practicum.event.model.Location;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

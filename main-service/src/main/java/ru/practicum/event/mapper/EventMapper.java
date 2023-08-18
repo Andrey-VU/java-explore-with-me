@@ -9,4 +9,5 @@ public interface EventMapper {
 
     Event makeEvent(NewEventDto newEventDto);
 
+
 }

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.category.dto.CategoryDto;
-import ru.practicum.event.location.Location;
+import ru.practicum.event.model.Location;
 
 import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;

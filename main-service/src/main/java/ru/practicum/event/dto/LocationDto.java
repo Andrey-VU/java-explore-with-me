@@ -1,4 +1,4 @@
-package ru.practicum.event.location;
+package ru.practicum.event.dto;
 
 import lombok.Data;
 
