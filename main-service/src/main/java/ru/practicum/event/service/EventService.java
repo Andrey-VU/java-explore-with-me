@@ -1,13 +1,14 @@
-package ru.practicum.event.model;
+package ru.practicum.event.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.enums.EventState;
+import ru.practicum.event.enums.SortBy;
 import ru.practicum.user.model.User;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,7 +20,9 @@ public interface EventService {
 
     EventFullDto updateAdmin(Long eventId, UpdateEventAdminRequest updateRequestDto);
 
-
-
+    List<EventFullDto> getPublicEvents(String text, Boolean paid, List<Category> categories, LocalDateTime rangeStart,
+                                       LocalDateTime rangeEnd, Boolean onlyAvailable, SortBy sort, Integer from,
+                                       Integer size);
+    EventFullDto getPublic(Long id, HttpServletRequest request);
 
 }

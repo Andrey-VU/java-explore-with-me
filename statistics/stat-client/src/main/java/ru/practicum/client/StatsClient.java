@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.exception.ValidationException;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Slf4j
+@Service
 public class StatsClient extends BaseClient {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -30,9 +32,10 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public void addStats(EndpointHit inputDto) {
+    public ResponseEntity<Object> addStats(EndpointHit inputDto) {
         log.info("StatsClient addStats: STARTED");
-        post("/hit", inputDto);
+        ResponseEntity<Object> responseEntity = post("/hit", inputDto);
+        return responseEntity;
     }
 
     public ResponseEntity<Object> viewStatistics(LocalDateTime start, LocalDateTime end, Set<String> uris) {

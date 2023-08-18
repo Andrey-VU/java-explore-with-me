@@ -1,6 +1,5 @@
 package ru.practicum.event.controller;
 
-
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -10,6 +9,7 @@ import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.enums.EventState;
+import ru.practicum.event.service.EventService;
 import ru.practicum.user.model.User;
 
 import javax.validation.constraints.Positive;
@@ -25,6 +25,7 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 @AllArgsConstructor
 @RequestMapping(path = "/admin/events")
 public class EventAdminController {
+    EventService eventService;
 
     @GetMapping
     List<EventFullDto> getAdmin(@RequestParam(required = false) List<User> users,
