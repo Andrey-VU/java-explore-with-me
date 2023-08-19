@@ -9,18 +9,20 @@ import ru.practicum.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
+import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
+
 @Data
 public class EventFullDto {
     private Long id;
     private String annotation;
     private CategoryDto category;
     private Long confirmedRequests;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime createdOn;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime publishedOn;
     private String description;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
     private UserShortDto initiator;
     private Location location;

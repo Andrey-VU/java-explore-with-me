@@ -1,12 +1,13 @@
 package ru.practicum.event.service;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.EventShortDto;
+import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
@@ -15,6 +16,7 @@ import ru.practicum.event.mapper.LocationMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repo.EventRepo;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.model.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,8 +31,17 @@ public class EventServiceImpl implements EventService{
     private final EventRepo eventRepo;
     private final ViewService viewService;
     private final EventMapper eventMapper;
-    //private final LocationMapper locationMapper;
-    //private final
+    private final LocationMapper locationMapper;
+
+    //Жизненный цикл события должен включать несколько этапов.
+    //Создание.
+    //Ожидание публикации. В статус ожидания публикации событие переходит сразу после создания.
+    //Публикация. В это состояние событие переводит администратор.
+    //Отмена публикации. В это состояние событие переходит в двух случаях.
+    // Первый — если администратор решил, что его нельзя публиковать.
+    // Второй — когда инициатор события решил отменить его на этапе ожидания публикации.
+    //Чтобы избежать распространённых ошибок при работе с моделью данных,
+    // применяйте знания из урока о подготовке к взаимодействию с БД.
 
     @Override
     public List<EventFullDto> getAdmin(List<User> users, List<EventState> states, List<Category> categories,
@@ -62,6 +73,31 @@ public class EventServiceImpl implements EventService{
         log.info("Найдено событие {}", event);
 
         return makeDtoWithViews(event, request);
+    }
+
+    @Override
+    public List<EventShortDto> getListPrivate(Long userId, Integer from, Integer size) {
+        return null;
+    }
+
+    @Override
+    public EventFullDto create(Long userId, NewEventDto dto) {
+        return null;
+    }
+
+    @Override
+    public EventFullDto getFullDtoEvent(Long userId, Long eventId) {
+        return null;
+    }
+
+    @Override
+    public EventFullDto updatePrivate(Long userId, Long eventId, NewEventDto newEventDto) {
+        return null;
+    }
+
+    @Override
+    public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
+        return null;
     }
 
     private EventFullDto makeDtoWithViews(Event event, HttpServletRequest request) {

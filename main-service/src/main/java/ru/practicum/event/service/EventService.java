@@ -2,10 +2,10 @@ package ru.practicum.event.service;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.UpdateEventAdminRequest;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
+import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.model.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,5 +24,17 @@ public interface EventService {
                                        LocalDateTime rangeEnd, Boolean onlyAvailable, SortBy sort, Integer from,
                                        Integer size);
     EventFullDto getPublic(Long id, HttpServletRequest request);
+
+    List<EventShortDto> getListPrivate(Long userId,Integer from, Integer size);
+
+    EventFullDto create(Long userId, NewEventDto dto);
+
+    EventFullDto getFullDtoEvent(Long userId, Long eventId);
+
+    EventFullDto updatePrivate(Long userId, Long eventId, NewEventDto newEventDto);
+
+    List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId);
+
+
 
 }
