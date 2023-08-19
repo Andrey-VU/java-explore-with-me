@@ -17,7 +17,10 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.repo.EventRepo;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.user.dto.UserShortDto;
+import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
+import ru.practicum.user.model.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -32,6 +35,8 @@ public class EventServiceImpl implements EventService{
     private final ViewService viewService;
     private final EventMapper eventMapper;
     private final LocationMapper locationMapper;
+    private final UserService userService;
+    private final UserMapper userMapper;
 
     //Жизненный цикл события должен включать несколько этапов.
     //Создание.
@@ -58,6 +63,10 @@ public class EventServiceImpl implements EventService{
     public EventFullDto updateAdmin(Long eventId, UpdateEventAdminRequest updateRequestDto) {
         return null;
     }
+// //Публикация. В это состояние событие переводит администратор.
+// //Отмена публикации. В это состояние событие переходит в двух случаях.
+// // Первый — если администратор решил, что его нельзя публиковать.
+// // Второй — когда инициатор события решил отменить его на этапе ожидания публикации.
 
     @Override
     public List<EventFullDto> getPublicEvents(String text, Boolean paid, List<Category> categories,
@@ -82,7 +91,10 @@ public class EventServiceImpl implements EventService{
 
     @Override
     public EventFullDto create(Long userId, NewEventDto dto) {
-        return null;
+        // при создании событие переходит в статус Ожидание публикации
+        Event newEvent = eventRepo.save(addInitiatorAndState(eventMapper.makeEvent(dto), userId));
+        log.info("{} - CREATED", eventMapper.makeShortDto(newEvent));
+        return eventMapper.makeFullDto(newEvent);
     }
 
     @Override
@@ -107,4 +119,12 @@ public class EventServiceImpl implements EventService{
         fullDto.setViews(views);
         return fullDto;
     }
+
+    private Event addInitiatorAndState(Event makeEvent, Long userId) {
+        User user = userMapper.makeUserFromDto(userService.get(userId));
+        makeEvent.setInitiator(user);
+        makeEvent.setEventState(EventState.PENDING);
+        return makeEvent;
+    }
+
 }
