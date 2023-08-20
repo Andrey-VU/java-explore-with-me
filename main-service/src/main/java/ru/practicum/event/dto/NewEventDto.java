@@ -3,6 +3,7 @@ package ru.practicum.event.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import ru.practicum.category.dto.CategoryDto;
+import ru.practicum.event.enums.EventState;
 import ru.practicum.event.model.Location;
 
 import javax.validation.constraints.NotBlank;
@@ -29,4 +30,5 @@ public class NewEventDto {
     private Boolean requestModeration;
     @NotBlank
     private String title;
+    private EventState eventState = EventState.PENDING;
 }

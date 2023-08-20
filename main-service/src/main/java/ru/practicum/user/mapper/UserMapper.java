@@ -10,7 +10,6 @@ import ru.practicum.user.model.User;
 public interface UserMapper {
     User makeUser(NewUserRequest newUserRequest);
     UserDto makeDto(User user);
-
     UserShortDto makeShort(User user);
     UserShortDto makeShortFromDto(UserDto userDto);
     User makeUserFromDto(UserDto userDto);

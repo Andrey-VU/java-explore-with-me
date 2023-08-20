@@ -34,6 +34,7 @@ public class EventServiceImpl implements EventService{
     private final EventRepo eventRepo;
     private final ViewService viewService;
     private final EventMapper eventMapper;
+    private final EventMapperService mapperService;
     private final LocationMapper locationMapper;
     private final UserService userService;
     private final UserMapper userMapper;
@@ -81,7 +82,7 @@ public class EventServiceImpl implements EventService{
             .orElseThrow(() -> new NotFoundException("Событие id " + id + " - не найдено"));
         log.info("Найдено событие {}", event);
 
-        return makeDtoWithViews(event, request);
+        return eventMapper.makeFullDto(event, mapperService.addViews(event.getId(), request));
     }
 
     @Override
@@ -91,10 +92,9 @@ public class EventServiceImpl implements EventService{
 
     @Override
     public EventFullDto create(Long userId, NewEventDto dto) {
-        // при создании событие переходит в статус Ожидание публикации
-        Event newEvent = eventRepo.save(addInitiatorAndState(eventMapper.makeEvent(dto), userId));
+        Event newEvent = eventRepo.save(eventMapper.makeEvent(dto, mapperService.makeUser(userId)));
         log.info("{} - CREATED", eventMapper.makeShortDto(newEvent));
-        return eventMapper.makeFullDto(newEvent);
+        return eventMapper.makeFullDto(newEvent, null);
     }
 
     @Override
@@ -110,21 +110,6 @@ public class EventServiceImpl implements EventService{
     @Override
     public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
         return null;
-    }
-
-    private EventFullDto makeDtoWithViews(Event event, HttpServletRequest request) {
-        Long views = viewService.getViewsById(event.getId(), request);
-        log.info("Событие {} было просмотрено {} раз", event, views);
-        EventFullDto fullDto = eventMapper.makeFullDto(event);
-        fullDto.setViews(views);
-        return fullDto;
-    }
-
-    private Event addInitiatorAndState(Event makeEvent, Long userId) {
-        User user = userMapper.makeUserFromDto(userService.get(userId));
-        makeEvent.setInitiator(user);
-        makeEvent.setEventState(EventState.PENDING);
-        return makeEvent;
     }
 
 }
