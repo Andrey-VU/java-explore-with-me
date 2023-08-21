@@ -8,6 +8,7 @@ import ru.practicum.event.model.Location;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDateTime;
 
 import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
@@ -16,8 +17,8 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 public class NewEventDto {
     @NotBlank
     private String annotation;
-    @NotNull
-    private CategoryDto category;
+    @Positive
+    private Long category;
     @NotBlank
     private String description;
     @NotNull

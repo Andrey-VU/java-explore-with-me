@@ -42,12 +42,11 @@ public class EventPrivateController {
         List<EventShortDto> eventShortDtoList = eventService.getListPrivate(userId, from, size);
         log.info("{} EVENTS is FOUND", eventShortDtoList.size());
         return eventShortDtoList;
-        //В случае, если по заданным фильтрам не найдено ни одного события, возвращает пустой список
     }
 
     @PostMapping("/events")
     @ResponseStatus(HttpStatus.CREATED)
-    EventFullDto create(@Positive @PathVariable Long userId,
+    EventFullDto createPrivate(@Positive @PathVariable Long userId,
                         @RequestBody @Valid NewEventDto newEventDto) {
         log.info("CREATE EVENT: {}, by USER {}  - Started", newEventDto, userId);
         EventFullDto eventFullDto = eventService.create(userId, newEventDto);
@@ -57,20 +56,18 @@ public class EventPrivateController {
 
     @GetMapping("/events/{eventId}")
     //Получение полной информации о событии добавленном текущим пользователем
-    EventFullDto getPrivate(@Positive @PathVariable Long userId, @Positive @PathVariable Long eventId) {
-        log.info("Try to find EVENT Id {} by USER Id {}", eventId, userId);
-        EventFullDto eventFullDto = eventService.getFullDtoEvent(userId, eventId);
+    EventFullDto getPrivate(@Positive @PathVariable Long initiatorId, @Positive @PathVariable Long eventId) {
+        log.info("Try to find EVENT Id {} by USER Id {}", eventId, initiatorId);
+        EventFullDto eventFullDto = eventService.getFullDtoEventPrivate(initiatorId, eventId);
         log.info("{} EVENT is FOUND", eventFullDto);
         return eventFullDto;
     }
 
     @PatchMapping("/events/{eventId}")
-    // изменить можно только отмененные события или события в состоянии ожидания модерации (Ожидается код ошибки 409)
-    //дата и время на которые намечено событие не может быть раньше, чем через два часа от текущего момента (Ожидается код ошибки 409)
     EventFullDto updatePrivate(@Positive @PathVariable Long userId,
                                @Positive @PathVariable Long eventId,
-                               @RequestBody @Valid NewEventDto newEventDto) {
-        EventFullDto eventFullDto = eventService.updatePrivate(userId, eventId, newEventDto);
+                               @RequestBody @Valid EventFullDto updateForEvent) {
+        EventFullDto eventFullDto = eventService.updatePrivate(userId, eventId, updateForEvent);
         log.info("EVENT was UPDATED: {}", eventFullDto);
         return eventFullDto;
     }

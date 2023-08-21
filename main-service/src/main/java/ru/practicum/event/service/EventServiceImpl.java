@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
@@ -12,32 +13,26 @@ import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
 import ru.practicum.event.mapper.EventMapper;
-import ru.practicum.event.mapper.LocationMapper;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.Location;
 import ru.practicum.event.repo.EventRepo;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.user.dto.UserShortDto;
-import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
-import ru.practicum.user.model.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService{
     private final EventRepo eventRepo;
-    private final ViewService viewService;
     private final EventMapper eventMapper;
     private final EventMapperService mapperService;
-    private final LocationMapper locationMapper;
-    private final UserService userService;
-    private final UserMapper userMapper;
 
     //Жизненный цикл события должен включать несколько этапов.
     //Создание.
@@ -62,10 +57,11 @@ public class EventServiceImpl implements EventService{
 
     @Override
     public EventFullDto updateAdmin(Long eventId, UpdateEventAdminRequest updateRequestDto) {
+
         return null;
     }
-// //Публикация. В это состояние событие переводит администратор.
-// //Отмена публикации. В это состояние событие переходит в двух случаях.
+// // Публикация. В это состояние событие переводит администратор.
+// // Отмена публикации. В это состояние событие переходит в двух случаях.
 // // Первый — если администратор решил, что его нельзя публиковать.
 // // Второй — когда инициатор события решил отменить его на этапе ожидания публикации.
 
@@ -77,34 +73,57 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public EventFullDto getPublic(Long id, HttpServletRequest request) {
-        Event event = eventRepo.findByIdAndPublishedOnBefore(id, LocalDateTime.now())
-            .orElseThrow(() -> new NotFoundException("Событие id " + id + " - не найдено"));
-        log.info("Найдено событие {}", event);
+    public EventFullDto getPublic(Long eventId, HttpServletRequest request) {
+        Event event = eventRepo.findByIdAndPublishedOnBefore(eventId, LocalDateTime.now())
+            .orElseThrow(() -> new NotFoundException("Событие id " + eventId + " - не найдено"));
 
-        return eventMapper.makeFullDto(event, mapperService.addViews(event.getId(), request));
+        EventFullDto fullDto = eventMapper.makeFullDtoAddViews(event, mapperService.addViews(event.getId()));
+        log.info("Найдено событие {}", fullDto);
+        mapperService.addStatistics(request);
+        log.info("Статистика о просмотре события id {} отправлена в StatService", eventId);
+        return fullDto;
     }
 
     @Override
-    public List<EventShortDto> getListPrivate(Long userId, Integer from, Integer size) {
-        return null;
+    public List<EventShortDto> getListPrivate(Long initiatorId, Integer from, Integer size) {
+        List<EventShortDto> eventShortDtoList = new ArrayList<>();
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        eventShortDtoList = eventRepo.findAllByInitiatorId(initiatorId, pageRequest).stream()
+            .map(event -> eventMapper.makeShortDto(event))
+            .collect(Collectors.toList());
+
+        log.info("Найдено {} событий, инициированных пользователем Id {}", eventShortDtoList.size(), initiatorId );
+        return eventShortDtoList;
     }
 
     @Override
-    public EventFullDto create(Long userId, NewEventDto dto) {
-        Event newEvent = eventRepo.save(eventMapper.makeEvent(dto, mapperService.makeUser(userId)));
+    public EventFullDto create(Long initiatorId, NewEventDto dto) {
+        User initiator = mapperService.makeUser(initiatorId);
+        Category category = mapperService.makeCategory(dto.getCategory());
+        Location location = mapperService.saveLocation(dto);
+
+        Event newEvent = eventRepo.save(eventMapper.makeEvent(dto, initiator, category));
         log.info("{} - CREATED", eventMapper.makeShortDto(newEvent));
-        return eventMapper.makeFullDto(newEvent, null);
+        return eventMapper.makeFullDtoAddViews(newEvent, null);
     }
 
     @Override
-    public EventFullDto getFullDtoEvent(Long userId, Long eventId) {
-        return null;
+    public EventFullDto getFullDtoEventPrivate(Long initiatorId, Long eventId) {
+        Event eventFromRepo = eventRepo.findById(eventId)
+            .orElseThrow(() -> new NotFoundException("Event Id " + eventId + "is NOT FOUND!"));
+        EventFullDto fullDto = eventMapper.makeFullDtoAddViews(eventFromRepo, mapperService.addViews(eventId));
+        isUserTheInitiator(initiatorId, fullDto);
+        log.info("Event {} is FOUND!", fullDto);
+        return eventMapper.makeFullDtoAddViews(eventFromRepo, mapperService.addViews(eventId)) ;
     }
 
     @Override
-    public EventFullDto updatePrivate(Long userId, Long eventId, NewEventDto newEventDto) {
-        return null;
+    public EventFullDto updatePrivate(Long initiatorId, Long eventId, EventFullDto updateForEvent) {
+        Event eventFromRepo = eventMapper.makeEventFromFullDto(getFullDtoEventPrivate(initiatorId, eventId));
+        Event prepareForUpdate = mapperService.prepareForUpdate(eventFromRepo, updateForEvent);
+        Event updatedEvent = eventRepo.save(prepareForUpdate);
+        log.info("{} - UPDATED", eventMapper.makeShortDto(updatedEvent));
+        return eventMapper.makeFullDto(updatedEvent);
     }
 
     @Override
@@ -112,4 +131,11 @@ public class EventServiceImpl implements EventService{
         return null;
     }
 
+    private void isUserTheInitiator(Long initiatorId, EventFullDto fullDto) {
+        if (initiatorId != fullDto.getInitiator().getId()) {
+            log.warn("Указанный Id {} не соответствует инициатору события {}", initiatorId, fullDto);
+            throw new NotFoundException("Не найдено события c id " + fullDto.getId()
+                + ", инициированного пользователем c id" + initiatorId);
+        }
+    }
 }

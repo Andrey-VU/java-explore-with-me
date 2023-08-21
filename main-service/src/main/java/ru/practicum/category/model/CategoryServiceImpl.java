@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
-import ru.practicum.category.mapper.CategoryMapperImpl;
+import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.repo.CategoryRepo;
 import ru.practicum.exception.NotFoundException;
 
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService{
     private final CategoryRepo categoryRepo;
-    private CategoryMapperImpl categoryMapper;
+    private CategoryMapper categoryMapper;
 
     @Override
     public CategoryDto add(NewCategoryDto newCategoryDto) {

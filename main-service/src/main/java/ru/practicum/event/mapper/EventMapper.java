@@ -2,6 +2,7 @@ package ru.practicum.event.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
@@ -12,8 +13,12 @@ import ru.practicum.user.model.User;
 public interface EventMapper {
     @Mapping(target = "initiator", source = "initiator")
     @Mapping(target = "id", expression = "java(null)")
-    Event makeEvent(NewEventDto newEventDto, User initiator);
+    @Mapping(target = "category", source = "category")
+    Event makeEvent(NewEventDto newEventDto, User initiator, Category category);
     @Mapping(target = "views", source = "views")
-    EventFullDto makeFullDto(Event event, Long views);
+    EventFullDto makeFullDtoAddViews(Event event, Long views);
+    EventFullDto makeFullDto(Event event);
     EventShortDto makeShortDto(Event event);
+
+    Event makeEventFromFullDto(EventFullDto fullDto);
 }

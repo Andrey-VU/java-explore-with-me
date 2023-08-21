@@ -29,7 +29,7 @@ public class EventFullDto {
     private Boolean paid;
     private Integer participantLimit;
     private Boolean requestModeration;
-    private EventState eventState;
+    private EventState state;
     private String title;
     private Long views;
 }

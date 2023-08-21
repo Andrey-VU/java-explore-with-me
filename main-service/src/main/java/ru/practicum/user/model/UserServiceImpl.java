@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
-import ru.practicum.user.mapper.UserMapperImpl;
+import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.repo.UserRepo;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService{
     private final UserRepo userRepo;
-    private UserMapperImpl userMapper;
+    private UserMapper userMapper;
 
     @Override
     public UserDto create(NewUserRequest newUserRequest) {

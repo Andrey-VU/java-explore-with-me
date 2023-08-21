@@ -61,7 +61,7 @@ public class Event {
     private Boolean requestModeration;
 
     @Column(name = "event_state")
-    private EventState eventState;
+    private EventState state;
 
     @Column(name = "title")
     private String title;

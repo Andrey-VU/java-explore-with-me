@@ -9,4 +9,5 @@ import ru.practicum.category.model.Category;
 public interface CategoryMapper {
     Category makeCategory(NewCategoryDto newCategoryDto);
     CategoryDto makeDto(Category category);
+    Category makeCategoryFromCategoryDto(CategoryDto dto);
 }
