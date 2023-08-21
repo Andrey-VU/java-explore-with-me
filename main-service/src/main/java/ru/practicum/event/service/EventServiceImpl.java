@@ -131,6 +131,12 @@ public class EventServiceImpl implements EventService{
         return null;
     }
 
+    @Override
+    public Event getEventById(Long eventId) {
+        return eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие " + eventId
+            + " не найдено!"));
+    }
+
     private void isUserTheInitiator(Long initiatorId, EventFullDto fullDto) {
         if (initiatorId != fullDto.getInitiator().getId()) {
             log.warn("Указанный Id {} не соответствует инициатору события {}", initiatorId, fullDto);

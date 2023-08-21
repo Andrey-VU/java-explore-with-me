@@ -5,6 +5,7 @@ import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
+import ru.practicum.event.model.Event;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.model.User;
 
@@ -36,5 +37,5 @@ public interface EventService {
     List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId);
 
 
-
+    Event getEventById(Long eventId);
 }

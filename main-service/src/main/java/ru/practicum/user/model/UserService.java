@@ -11,4 +11,6 @@ public interface UserService {
     List<UserDto> getUsers(List<Long> ids, int size, int from);
 
     UserDto get(Long userId);
+
+    User getUserById(Long requesterId);
 }

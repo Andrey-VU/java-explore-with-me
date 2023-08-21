@@ -58,4 +58,10 @@ public class UserServiceImpl implements UserService{
         return userMapper.makeDto(userRepo.findById(userId)
             .orElseThrow( () -> new NotFoundException("User id " + userId + " is NOT FOUND!")));
     }
+
+    @Override
+    public User getUserById(Long requesterId) {
+        return userRepo.findById(requesterId)
+            .orElseThrow(() -> new NotFoundException("Пользователь " + requesterId + " НЕ НАЙДЕН!"));
+    }
 }
