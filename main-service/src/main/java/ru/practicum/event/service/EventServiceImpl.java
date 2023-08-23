@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
@@ -14,7 +13,6 @@ import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
-import ru.practicum.event.model.Location;
 import ru.practicum.event.repo.EventRepo;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
@@ -52,6 +50,8 @@ public class EventServiceImpl implements EventService{
         List<EventFullDto> eventsForAdmin = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
 
+
+
         return eventsForAdmin;
     }
 
@@ -77,9 +77,11 @@ public class EventServiceImpl implements EventService{
         Event event = eventRepo.findByIdAndPublishedOnBefore(eventId, LocalDateTime.now())
             .orElseThrow(() -> new NotFoundException("Событие id " + eventId + " - не найдено"));
 
-        EventFullDto fullDto = eventMapper.makeFullDtoAddViews(event, mapperService.addViews(event.getId()));
+        Long views = mapperService.addViews(event.getId());
+        Long participants = mapperService.getParticipants(event.getId());
+        EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(event, views, participants);
         log.info("Найдено событие {}", fullDto);
-        mapperService.addStatistics(request);
+        mapperService.saveStatistics(request);
         log.info("Статистика о просмотре события id {} отправлена в StatService", eventId);
         return fullDto;
     }
@@ -100,21 +102,25 @@ public class EventServiceImpl implements EventService{
     public EventFullDto create(Long initiatorId, NewEventDto dto) {
         User initiator = mapperService.makeUser(initiatorId);
         Category category = mapperService.makeCategory(dto.getCategory());
-        Location location = mapperService.saveLocation(dto);
+        mapperService.saveLocation(dto);
 
         Event newEvent = eventRepo.save(eventMapper.makeEvent(dto, initiator, category));
         log.info("{} - CREATED", eventMapper.makeShortDto(newEvent));
-        return eventMapper.makeFullDtoAddViews(newEvent, null);
+        return eventMapper.makeFullDtoAddViewsAndParticipants(newEvent, null, null);
     }
 
     @Override
     public EventFullDto getFullDtoEventPrivate(Long initiatorId, Long eventId) {
         Event eventFromRepo = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException("Event Id " + eventId + "is NOT FOUND!"));
-        EventFullDto fullDto = eventMapper.makeFullDtoAddViews(eventFromRepo, mapperService.addViews(eventId));
+
+        Long views = mapperService.addViews(eventId);
+        Long participants = mapperService.getParticipants(eventId);
+
+        EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(eventFromRepo, views, participants);
         isUserTheInitiator(initiatorId, fullDto);
         log.info("Event {} is FOUND!", fullDto);
-        return eventMapper.makeFullDtoAddViews(eventFromRepo, mapperService.addViews(eventId)) ;
+        return fullDto;
     }
 
     @Override

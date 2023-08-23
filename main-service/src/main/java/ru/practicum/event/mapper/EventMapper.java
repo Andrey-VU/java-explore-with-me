@@ -16,7 +16,8 @@ public interface EventMapper {
     @Mapping(target = "category", source = "category")
     Event makeEvent(NewEventDto newEventDto, User initiator, Category category);
     @Mapping(target = "views", source = "views")
-    EventFullDto makeFullDtoAddViews(Event event, Long views);
+    @Mapping(target = "confirmedRequests", source = "participants")
+    EventFullDto makeFullDtoAddViewsAndParticipants(Event event, Long views, Long participants);
     EventFullDto makeFullDto(Event event);
     EventShortDto makeShortDto(Event event);
 

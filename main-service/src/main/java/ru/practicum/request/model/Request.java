@@ -1,10 +1,7 @@
 package ru.practicum.request.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.practicum.event.model.Event;
 import ru.practicum.request.enums.RequestState;
 import ru.practicum.user.model.User;
@@ -20,6 +17,7 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 @Setter
 @EqualsAndHashCode
 @Table(name = "requests", schema = "public")
+@Builder
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -87,15 +87,9 @@ public class EventPrivateController {
     EventRequestStatusUpdateResult updateRequestsPrivate(@Positive @PathVariable Long userId,
                                                          @Positive @PathVariable Long eventId,
                                                          @RequestBody @Valid EventRequestStatusUpdateRequest requestDto) {
-        EventRequestStatusUpdateResult resultOfRequests = requestService.getResultRequestsListPrivate(userId, eventId);
+        EventRequestStatusUpdateResult resultOfRequests
+            = requestService.updateResultRequestsListPrivate(userId, eventId, requestDto);
         //log.info("{} EVENTS is FOUND", resultOfRequests.size());
         return resultOfRequests;
-
-    //если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется
-    //нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие (Ожидается код ошибки 409)
-    //статус можно изменить только у заявок, находящихся в состоянии ожидания (Ожидается код ошибки 409)
-    //если при подтверждении данной заявки, лимит заявок для события исчерпан,
-    //то все неподтверждённые заявки необходимо отклонить
-
     }
 }

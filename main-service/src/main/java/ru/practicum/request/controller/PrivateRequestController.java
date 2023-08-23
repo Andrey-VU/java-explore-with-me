@@ -23,7 +23,6 @@ public class PrivateRequestController {
         log.info("Принят запрос на получение списка всех заявок пользователя Id {}", userId);
         return requestService.getPrivate(userId);
         // Получение информации о заявках текущего пользователя на участие в чужих событиях
-
     }
 
     @PostMapping

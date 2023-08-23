@@ -13,6 +13,7 @@ import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
 import ru.practicum.exception.EwmConflictException;
+import ru.practicum.request.service.RequestService;
 import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.model.UserService;
@@ -31,6 +32,7 @@ public class EventMapperService {
     private final CategoryMapper categoryMapper;
     private final EventMapper eventMapper;
     private final UserMapper userMapper;
+    private final RequestService requestService;
 
     User makeUser(Long userId) {
         return userMapper.makeUserFromDto(userService.get(userId));
@@ -42,7 +44,11 @@ public class EventMapperService {
         return views;
     }
 
-    public void addStatistics(HttpServletRequest request) {
+    public Long getParticipants(Long eventId) {
+        return requestService.getConfirmedRequestsById(eventId);
+    }
+
+    public void saveStatistics(HttpServletRequest request) {
         viewService.saveHit(request.getRequestURI(), request.getLocalAddr());
     }
 
@@ -105,6 +111,7 @@ public class EventMapperService {
     public Location saveLocation(NewEventDto dto) {
         return locationService.save(dto.getLocation());
     }
+
 }
 
 
