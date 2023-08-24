@@ -1,5 +1,6 @@
 package ru.practicum.event.service;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -13,13 +14,14 @@ import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repo.EventRepo;
 import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.model.User;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +53,11 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public List<EventFullDto> getAdmin(List<User> users, List<EventState> states, List<Category> categories,
-                                       LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
+    public List<EventFullDto> getAdmin(List<User> users,
+                                       List<EventState> states,
+                                       List<Category> categories,
+                                       LocalDateTime rangeStart,
+                                       LocalDateTime rangeEnd, Integer from, Integer size) {
 
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             log.warn("Указано некорректное время начала/окончания интервала");
@@ -71,10 +76,35 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
+    //@Transactional(readOnly = true)
     public List<EventFullDto> getPublicEvents(String text, Boolean paid, List<Category> categories,
                                               LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
                                               SortBy sort, Integer from, Integer size) {
-        return null;
+
+        if (rangeEnd.isBefore(rangeStart)) {
+            log.error("Некорректные даты в запросе: начало интервала позже его завершения");
+            throw new EwmConflictException ("Некорректные даты в запросе");
+        }
+
+//       BooleanExpression byText = QEvent. .eq(text);
+
+        // ПУБЛИЧНЫЙ ЗАПРОС НАДО ОТПРАВИТЬ В СТАТИСТИКУ
+
+        List<EventFullDto> eventsForPublic = new ArrayList<>();
+        List<Event> events = new ArrayList<>();
+
+
+        events = eventRepo.getEventsPublic(text, paid, categories, rangeStart, rangeEnd, onlyAvailable,
+            sort, from, size);
+
+        eventsForPublic = events.stream()
+            .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.addViews(event.getId()),
+                mapperService.getParticipants(event.getId())))
+            .collect(Collectors.toList());
+
+        log.info("Найдено {} событий", eventsForPublic.size());
+
+        return eventsForPublic;
     }
 
     @Override
@@ -137,10 +167,11 @@ public class EventServiceImpl implements EventService{
         return eventMapper.makeFullDto(updatedEvent);
     }
 
-    @Override
-    public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
-        return null;
-    }
+//    @Override
+//    public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
+//
+//        return null;
+//    }
 
     @Override
     public Event getEventById(Long eventId) {

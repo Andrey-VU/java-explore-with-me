@@ -28,6 +28,7 @@ public class QueryHelper {
         if (users == null && states == null && categories == null && rangeEnd == null && rangeStart == null) {
             events = eventRepo.findAll(pageRequest).stream().collect(Collectors.toList());
         }
+
         // 2, 3, 4, 5 users != null
         else if (users != null && states == null && categories == null && rangeEnd == null && rangeStart == null) {
             events = eventRepo.findAllByInitiatorIn(users, pageRequest);
@@ -41,6 +42,7 @@ public class QueryHelper {
             events = eventRepo.findAllByInitiatorInAndEventDateAfterAndEventDateBefore(users, rangeStart,
                 rangeEnd, pageRequest);
         }
+
         // 6, 7, 8, 9 states != null
         else if (states != null && users == null && categories == null && rangeEnd == null && rangeStart == null) {
             events = eventRepo.findAllByStateIn(states, pageRequest);

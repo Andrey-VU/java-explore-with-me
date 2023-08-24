@@ -2,8 +2,11 @@ package ru.practicum.event.repo;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.enums.EventState;
+import ru.practicum.event.enums.SortBy;
 import ru.practicum.event.model.Event;
 import ru.practicum.user.model.User;
 
@@ -11,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface EventRepo extends JpaRepository<Event, Long> {
+public interface EventRepo extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
     Optional<Event> findByIdAndPublishedOnBefore(Long id, LocalDateTime now);
 
     List<Event> findAllByInitiatorId(Long userId, PageRequest pageRequest);
@@ -79,6 +82,19 @@ public interface EventRepo extends JpaRepository<Event, Long> {
 
     List<Event> findAllByStateInAndInitiatorInAndCategoryInAndEventDateAfterAndEventDateBefore(List<EventState> states, List<User> users, List<Category> categories,
                                                                                                LocalDateTime rangeStart, LocalDateTime rangeEnd, PageRequest pageRequest);
+
+//    @Query("select e from Event e where e.isAvailable = True AND " +
+//        "( upper(i.name) like upper(concat('%', ?1, '%')) " +
+//        " or upper(i.description) like upper(concat('%', ?1, '%')))")
+    List<Event> getEventsPublic(String text,
+                                Boolean paid,
+                                List<Category> categories,
+                                LocalDateTime rangeStart,
+                                LocalDateTime rangeEnd,
+                                Boolean onlyAvailable,
+                                SortBy sort,
+                                Integer from,
+                                Integer size);
 
 //    List<Event> getEventsAdmin(List<User> users,
 //                               List<EventState> states,
