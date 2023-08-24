@@ -1,9 +1,6 @@
 package ru.practicum.event.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.user.model.User;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
 @ToString
 @Getter
 @Setter
+@Builder
 @EqualsAndHashCode
 @Table(name = "events", schema = "public")
 public class Event {

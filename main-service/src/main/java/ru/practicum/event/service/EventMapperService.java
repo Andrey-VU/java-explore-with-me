@@ -8,7 +8,9 @@ import ru.practicum.category.model.Category;
 import ru.practicum.category.model.CategoryService;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.enums.EventState;
+import ru.practicum.event.enums.StateActionAdmin;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
@@ -67,45 +69,74 @@ public class EventMapperService {
             throw new EwmConflictException("Дата и время на которые намечено событие не может быть раньше, чем " +
                 "через два часа от текущего момента");
         }
-        Event newEvent =  eventFromRepo;
-        if (updateForEvent.getPaid() != null && !newEvent.getPaid().equals(updateForEvent.getPaid())) {
-            newEvent.setPaid(updateForEvent.getPaid());
-        }
-        if (updateForEvent.getEventDate() != null && !newEvent.getEventDate().equals(updateForEvent.getEventDate())){
-            newEvent.setEventDate(updateForEvent.getEventDate());
-        }
-        if (updateForEvent.getAnnotation() != null && !newEvent.getAnnotation().equals(updateForEvent.getAnnotation())){
-            newEvent.setAnnotation(updateForEvent.getAnnotation());
-        }
-        if (updateForEvent.getCategory().getId() != null
-            && newEvent.getCategory().getId() != (updateForEvent.getCategory().getId())){
-            newEvent.setCategory(categoryMapper.makeCategoryFromCategoryDto(updateForEvent.getCategory()));
-        }
-        if (updateForEvent.getDescription() != null
-            && !newEvent.getDescription().equals(updateForEvent.getDescription())){
-            newEvent.setDescription(updateForEvent.getDescription());
-        }
-        if (updateForEvent.getTitle() != null && !newEvent.getTitle().equals(updateForEvent.getTitle())){
-            newEvent.setTitle(updateForEvent.getTitle());
-        }
-        if (updateForEvent.getLocation() != null
-            && newEvent.getLocation().getId() != updateForEvent.getLocation().getId()){
-            newEvent.setLocation(updateForEvent.getLocation());
-        }
-        if (updateForEvent.getParticipantLimit() != null
-            && newEvent.getParticipantLimit() != updateForEvent.getParticipantLimit()){
-            newEvent.setParticipantLimit(updateForEvent.getParticipantLimit());
-        }
-        if (updateForEvent.getRequestModeration() != null
-            && newEvent.getRequestModeration() != updateForEvent.getRequestModeration()){
-            newEvent.setRequestModeration(updateForEvent.getRequestModeration());
-        }
-        log.info("Event id {} ready for update", eventFromRepo.getId() );
-        return newEvent;
+        return updateFieldsWithoutState(eventFromRepo, updateForEvent);
     }
 
     public Category makeCategory(Long category) {
         return categoryMapper.makeCategoryFromCategoryDto(categoryService.getPublic(category));
+    }
+
+    public Event prepareForAdminUpdate(Event eventFromRepo, UpdateEventAdminRequest updateRequestDto) {
+        if (eventMapper.makeFullDto(eventFromRepo).equals(eventMapper.makeUpdateAdmin(updateRequestDto))) {
+            log.info("Пакет обновлений идентичен содержанию сохранённого События. Обновление не требуется");
+            throw new EwmConflictException("Обновления не выполнено: входящий пакет не содержит новой информации");
+        }
+        if (!updateRequestDto.getEventDate().minusHours(1).isBefore(eventFromRepo.getPublishedOn())) {
+            log.warn("Событие не может быть обновлено. Конфликт дат");
+            throw new EwmConflictException("Изменяемое событие должно начинаться позже, чем через час после публикации!");
+        }
+        if (!eventFromRepo.getState().equals(EventState.PENDING)) {
+            log.warn("Событие не может быть опубликовано. Конфликт состояния");
+            throw new EwmConflictException("Опубликовать можно события в статусе ожидания публикации");
+        }
+        if (updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)
+            && eventFromRepo.getState().equals(EventState.PUBLISHED)
+            || eventFromRepo.getState().equals(EventState.CANCELED)) {
+            log.warn("Cобытие можно отклонить, только если оно еще не опубликовано");
+            throw new EwmConflictException("Cобытие можно отклонить, только если оно еще не опубликовано");
+        }
+        return updateFieldsWithoutState(eventFromRepo, eventMapper.makeUpdateAdmin(updateRequestDto));
+    }
+
+    private Event updateFieldsWithoutState(Event eventFromRepo, EventFullDto makeUpdate) {
+
+        if (makeUpdate.getPaid() != null && !eventFromRepo.getPaid().equals(makeUpdate.getPaid())) {
+            eventFromRepo.setPaid(makeUpdate.getPaid());
+        }
+
+        if (makeUpdate.getEventDate() != null && !eventFromRepo.getEventDate().equals(makeUpdate.getEventDate())){
+            eventFromRepo.setEventDate(makeUpdate.getEventDate());
+        }
+
+        if (makeUpdate.getAnnotation() != null && !eventFromRepo.getAnnotation().equals(makeUpdate.getAnnotation())){
+            eventFromRepo.setAnnotation(makeUpdate.getAnnotation());
+        }
+        if (makeUpdate.getCategory().getId() != null
+            && eventFromRepo.getCategory().getId() != (makeUpdate.getCategory().getId())){
+            eventFromRepo.setCategory(categoryMapper.makeCategoryFromCategoryDto(makeUpdate.getCategory()));
+        }
+        if (makeUpdate.getDescription() != null
+            && !eventFromRepo.getDescription().equals(makeUpdate.getDescription())){
+            eventFromRepo.setDescription(makeUpdate.getDescription());
+        }
+        if (makeUpdate.getTitle() != null && !eventFromRepo.getTitle().equals(makeUpdate.getTitle())){
+            eventFromRepo.setTitle(makeUpdate.getTitle());
+        }
+        if (makeUpdate.getLocation() != null
+            && eventFromRepo.getLocation().getId() != makeUpdate.getLocation().getId()){
+            eventFromRepo.setLocation(makeUpdate.getLocation());
+        }
+        if (makeUpdate.getParticipantLimit() != null
+            && eventFromRepo.getParticipantLimit() != makeUpdate.getParticipantLimit()){
+            eventFromRepo.setParticipantLimit(makeUpdate.getParticipantLimit());
+        }
+        if (makeUpdate.getRequestModeration() != null
+            && eventFromRepo.getRequestModeration() != makeUpdate.getRequestModeration()){
+            eventFromRepo.setRequestModeration(makeUpdate.getRequestModeration());
+        }
+
+        log.info("Event id {} ready for update", eventFromRepo.getId() );
+        return eventFromRepo;
     }
 
     public Location saveLocation(NewEventDto dto) {

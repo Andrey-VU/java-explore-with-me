@@ -6,6 +6,7 @@ import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.model.Event;
 import ru.practicum.user.model.User;
 
@@ -20,6 +21,6 @@ public interface EventMapper {
     EventFullDto makeFullDtoAddViewsAndParticipants(Event event, Long views, Long participants);
     EventFullDto makeFullDto(Event event);
     EventShortDto makeShortDto(Event event);
-
+    EventFullDto makeUpdateAdmin(UpdateEventAdminRequest updateRequestDto);
     Event makeEventFromFullDto(EventFullDto fullDto);
 }

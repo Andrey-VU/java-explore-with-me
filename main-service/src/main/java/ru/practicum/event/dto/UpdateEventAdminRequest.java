@@ -1,10 +1,11 @@
 package ru.practicum.event.dto;
 
+import lombok.Getter;
+import lombok.Setter;
 import ru.practicum.event.enums.StateActionAdmin;
 
-//Данные для изменения информации о событии.
-//Если поле в запросе не указано (равно null) - значит изменение этих данных не треубется.
-
+@Getter
+@Setter
 public class UpdateEventAdminRequest extends UpdateEventRequestAbstract {
     private StateActionAdmin stateAction;
 }

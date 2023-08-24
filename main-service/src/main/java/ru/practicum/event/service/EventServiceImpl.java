@@ -14,6 +14,7 @@ import ru.practicum.event.enums.SortBy;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repo.EventRepo;
+import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.model.User;
@@ -31,39 +32,43 @@ public class EventServiceImpl implements EventService{
     private final EventRepo eventRepo;
     private final EventMapper eventMapper;
     private final EventMapperService mapperService;
-
-    //Жизненный цикл события должен включать несколько этапов.
-    //Создание.
-    //Ожидание публикации. В статус ожидания публикации событие переходит сразу после создания.
-    //Публикация. В это состояние событие переводит администратор.
-    //Отмена публикации. В это состояние событие переходит в двух случаях.
-    // Первый — если администратор решил, что его нельзя публиковать.
-    // Второй — когда инициатор события решил отменить его на этапе ожидания публикации.
-    //Чтобы избежать распространённых ошибок при работе с моделью данных,
-    // применяйте знания из урока о подготовке к взаимодействию с БД.
-
-    @Override
-    public List<EventFullDto> getAdmin(List<User> users, List<EventState> states, List<Category> categories,
-                                       LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
-        //Эндпоинт возвращает полную информацию обо всех событиях подходящих под переданные условия
-        //В случае, если по заданным фильтрам не найдено ни одного события, возвращает пустой список
-        List<EventFullDto> eventsForAdmin = new ArrayList<>();
-        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
-
-
-
-        return eventsForAdmin;
-    }
+    private final QueryHelper queryHelper;
 
     @Override
     public EventFullDto updateAdmin(Long eventId, UpdateEventAdminRequest updateRequestDto) {
 
-        return null;
+        Event eventFromRepo = eventRepo.findById(eventId)
+            .orElseThrow(() -> new NotFoundException("Событие не найдено!"));
+
+        Event preparedEventForUpdate = mapperService.prepareForAdminUpdate(eventFromRepo, updateRequestDto);
+        Event updatedEvent = eventRepo.save(preparedEventForUpdate);
+
+        Long views = mapperService.addViews(eventId);
+        Long participants = mapperService.getParticipants(eventId);
+        EventFullDto updatedFullDto = eventMapper.makeFullDtoAddViewsAndParticipants(updatedEvent, views, participants);
+
+        return updatedFullDto;
     }
-// // Публикация. В это состояние событие переводит администратор.
-// // Отмена публикации. В это состояние событие переходит в двух случаях.
-// // Первый — если администратор решил, что его нельзя публиковать.
-// // Второй — когда инициатор события решил отменить его на этапе ожидания публикации.
+
+    @Override
+    public List<EventFullDto> getAdmin(List<User> users, List<EventState> states, List<Category> categories,
+                                       LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
+
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            log.warn("Указано некорректное время начала/окончания интервала");
+            throw new EwmConflictException("Задан некорректный временной интервал для поиска");
+        }
+
+        List<Event> events = new ArrayList<>();
+        events = queryHelper.methodsDispatcher(events, users, states, categories, rangeStart, rangeEnd, from, size);
+
+        log.info("Найдено {} событий в соответствии с заданными критериями", events.size());
+
+        return events.stream()
+            .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.addViews(event.getId()),
+                mapperService.getParticipants(event.getId())))
+            .collect(Collectors.toList());
+    }
 
     @Override
     public List<EventFullDto> getPublicEvents(String text, Boolean paid, List<Category> categories,
