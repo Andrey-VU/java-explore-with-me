@@ -62,12 +62,13 @@ public class EventMapperService {
             log.info("Пакет обновлений идентичен содержанию сохранённого События. Обновление не требуется");
             throw new EwmConflictException("Обновления не выполнено: входящий пакет не содержит новой информации");
         }
-        if (updateForEvent.getState().equals(EventState.PUBLISHED)) {
+        if (!eventFromRepo.getState().equals(EventState.PENDING)) {
             log.warn("Событие не может быть обновлено. Конфликт состояния");
             throw new EwmConflictException("изменить можно только отмененные события или события в состоянии " +
                 "ожидания модерации");
         }
-        if (updateForEvent.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+        if (updateForEvent.getEventDate() != null &&
+            updateForEvent.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             log.warn("Событие не может быть обновлено. Конфликт дат");
             throw new EwmConflictException("Дата и время на которые намечено событие не может быть раньше, чем " +
                 "через два часа от текущего момента");
@@ -149,42 +150,55 @@ public class EventMapperService {
 
     private Event updateFieldsWithoutState(Event eventFromRepo, EventFullDto makeUpdate) {
 
+        int needsForUpdateCounter = 9;
+
         if (makeUpdate.getPaid() != null && !eventFromRepo.getPaid().equals(makeUpdate.getPaid())) {
             eventFromRepo.setPaid(makeUpdate.getPaid());
-        }
+        } else needsForUpdateCounter -= 1;
 
         if (makeUpdate.getEventDate() != null && !eventFromRepo.getEventDate().equals(makeUpdate.getEventDate())){
             eventFromRepo.setEventDate(makeUpdate.getEventDate());
-        }
+        } else needsForUpdateCounter -= 1;
 
         if (makeUpdate.getAnnotation() != null && !eventFromRepo.getAnnotation().equals(makeUpdate.getAnnotation())){
             eventFromRepo.setAnnotation(makeUpdate.getAnnotation());
-        }
-        if (makeUpdate.getCategory().getId() != null
+        } else needsForUpdateCounter -= 1;
+
+        if (makeUpdate.getCategory() != null
             && !eventFromRepo.getCategory().getId().equals(makeUpdate.getCategory().getId())){
             eventFromRepo.setCategory(categoryMapper.makeCategoryFromCategoryDto(makeUpdate.getCategory()));
-        }
+        } else needsForUpdateCounter -= 1;
+
         if (makeUpdate.getDescription() != null
             && !eventFromRepo.getDescription().equals(makeUpdate.getDescription())){
             eventFromRepo.setDescription(makeUpdate.getDescription());
-        }
+        } else needsForUpdateCounter -= 1;
+
         if (makeUpdate.getTitle() != null && !eventFromRepo.getTitle().equals(makeUpdate.getTitle())){
             eventFromRepo.setTitle(makeUpdate.getTitle());
-        }
+        } else needsForUpdateCounter -= 1;
+
         if (makeUpdate.getLocation() != null
             && !eventFromRepo.getLocation().equals(makeUpdate.getLocation())){
             eventFromRepo.setLocation(makeUpdate.getLocation());
-        }
+        } else needsForUpdateCounter -= 1;
+
         if (makeUpdate.getParticipantLimit() != null
             && !eventFromRepo.getParticipantLimit().equals(makeUpdate.getParticipantLimit())){
             eventFromRepo.setParticipantLimit(makeUpdate.getParticipantLimit());
-        }
+        } else needsForUpdateCounter -= 1;
+
         if (makeUpdate.getRequestModeration() != null
             && eventFromRepo.getRequestModeration() != makeUpdate.getRequestModeration()){
             eventFromRepo.setRequestModeration(makeUpdate.getRequestModeration());
-        }
+        } else needsForUpdateCounter -= 1;
 
-        log.info("Event id {} ready for update", eventFromRepo.getId() );
+        if (needsForUpdateCounter > 0) {
+            log.info("Event id {} ready for update", eventFromRepo.getId());
+        } else {
+            log.info("Обновление для события id {} НЕ СОДЕРЖИТ ОБНОВЛЕНИЙ", eventFromRepo.getId());
+            eventFromRepo.setState(EventState.CANCELED);
+        }
         return eventFromRepo;
     }
 

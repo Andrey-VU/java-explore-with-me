@@ -39,6 +39,9 @@ public class EventServiceImpl implements EventService{
         Event eventFromRepo = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException("Событие не найдено!"));
 
+        if (updateRequestDto.getLocation() != null) {
+            updateRequestDto.getLocation().setId(eventFromRepo.getLocation().getId());
+        }
         Event preparedEventForUpdate = mapperService.prepareForAdminUpdate(eventFromRepo, updateRequestDto);
         Event updatedEvent = eventRepo.save(preparedEventForUpdate);
 
@@ -167,6 +170,9 @@ public class EventServiceImpl implements EventService{
     public EventFullDto updatePrivate(Long initiatorId, Long eventId, EventFullDto updateForEvent) {
         Event eventFromRepo = eventMapper.makeEventFromFullDto(getFullDtoEventPrivate(initiatorId, eventId));
         Event prepareForUpdate = mapperService.prepareForUpdate(eventFromRepo, updateForEvent);
+
+
+
         Event updatedEvent = eventRepo.save(prepareForUpdate);
         log.info("PRIVATE ACCESS. {} - UPDATED", eventMapper.makeShortDto(updatedEvent));
         return eventMapper.makeFullDto(updatedEvent);

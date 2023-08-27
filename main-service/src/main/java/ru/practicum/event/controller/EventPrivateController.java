@@ -92,8 +92,12 @@ public class EventPrivateController {
                                                          @RequestBody @Valid EventRequestStatusUpdateRequest requestDto) {
         EventRequestStatusUpdateResult resultOfRequests
             = requestService.updateResultRequestsListPrivate(userId, eventId, requestDto);
-        log.info("PRIVATE ACCESS. {} WAS CONFIRMED & {} WAS DECLINED", resultOfRequests.getConfirmedRequests().size(),
-            resultOfRequests.getRejectedRequests().size());
+        if (resultOfRequests.getConfirmedRequests() != null) {
+            log.info("PRIVATE ACCESS. {} WAS CONFIRMED", resultOfRequests.getConfirmedRequests().size());
+        }
+        if (resultOfRequests.getRejectedRequests() != null) {
+            log.info("PRIVATE ACCESS. {} WAS DECLINED", resultOfRequests.getRejectedRequests().size());
+        }
         return resultOfRequests;
     }
 }
