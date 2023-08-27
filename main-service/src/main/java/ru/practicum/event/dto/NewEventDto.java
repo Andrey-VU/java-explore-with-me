@@ -15,11 +15,14 @@ public class NewEventDto {
     @NotBlank
     @Size(min = 20, max = 2000)
     private String annotation;
+
     @Positive
     private Long category;
+
     @NotBlank
     @Size(min = 20, max = 7000)
     private String description;
+
     @NotNull
     @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;

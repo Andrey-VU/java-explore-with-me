@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class PrivateRequestController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ParticipationRequestDto create(@Positive @PathVariable Long userId,
+    ParticipationRequestDto create(@PathVariable Long userId,
                                    @RequestParam Long eventId){
         log.info("Принят запрос от пользователя Id {} на создание заявки для участие в мероприятии Id {}",
             userId, eventId);

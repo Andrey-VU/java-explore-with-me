@@ -29,12 +29,6 @@ public class EventPrivateController {
     EventService eventService;
     RequestService requestService;
 
-    // авторизованные пользователи должны иметь возможность добавлять в приложение новые мероприятия,
-    // редактировать их и просматривать после добавления;
-    // должна быть настроена подача заявок на участие в интересующих мероприятиях;
-    // создатель мероприятия должен иметь возможность подтверждать заявки,
-    // которые отправили другие пользователи сервиса.
-
     @GetMapping("/events")
     List<EventShortDto> getListPrivate(@Positive @PathVariable Long userId,
                                        @PositiveOrZero @RequestParam (required = false, defaultValue = "0") Integer from,
