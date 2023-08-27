@@ -12,6 +12,7 @@ import ru.practicum.event.enums.EventState;
 import ru.practicum.event.service.EventService;
 import ru.practicum.user.model.User;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -46,7 +47,7 @@ public class EventAdminController {
 
     @PatchMapping("/{eventId}")
     EventFullDto updateAdmin(@Positive @PathVariable Long eventId,
-                             @RequestBody UpdateEventAdminRequest updateRequest){
+                             @Valid @RequestBody UpdateEventAdminRequest updateRequest){
         return eventService.updateAdmin(eventId, updateRequest);
     }
 

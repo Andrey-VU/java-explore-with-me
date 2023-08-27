@@ -40,26 +40,26 @@ public class EventPrivateController {
                                        @PositiveOrZero @RequestParam (required = false, defaultValue = "0") Integer from,
                                        @Positive @RequestParam (required = false, defaultValue = "10") Integer size) {
         List<EventShortDto> eventShortDtoList = eventService.getListPrivate(userId, from, size);
-        log.info("{} EVENTS is FOUND", eventShortDtoList.size());
+        log.info("PRIVATE ACCESS. {} EVENTS is FOUND", eventShortDtoList.size());
         return eventShortDtoList;
     }
 
     @PostMapping("/events")
     @ResponseStatus(HttpStatus.CREATED)
     EventFullDto createPrivate(@Positive @PathVariable Long userId,
-                        @RequestBody @Valid NewEventDto newEventDto) {
+                               @RequestBody @Valid NewEventDto newEventDto) {
         log.info("CREATE EVENT: {}, by USER {}  - Started", newEventDto, userId);
         EventFullDto eventFullDto = eventService.create(userId, newEventDto);
-        log.info("EVENT {} is CREATED", eventFullDto);
+        log.info("PRIVATE ACCESS. EVENT {} is CREATED", eventFullDto);
         return eventFullDto;
     }
 
     @GetMapping("/events/{eventId}")
     //Получение полной информации о событии добавленном текущим пользователем
-    EventFullDto getPrivate(@Positive @PathVariable Long initiatorId, @Positive @PathVariable Long eventId) {
-        log.info("Try to find EVENT Id {} by USER Id {}", eventId, initiatorId);
-        EventFullDto eventFullDto = eventService.getFullDtoEventPrivate(initiatorId, eventId);
-        log.info("{} EVENT is FOUND", eventFullDto);
+    EventFullDto getPrivate(@Positive @PathVariable Long userId, @Positive @PathVariable Long eventId) {
+        log.info("Try to find EVENT Id {} by USER Id {}", eventId, userId);
+        EventFullDto eventFullDto = eventService.getFullDtoEventPrivate(userId, eventId);
+        log.info("PRIVATE ACCESS. {} EVENT is FOUND", eventFullDto);
         return eventFullDto;
     }
 
@@ -68,7 +68,7 @@ public class EventPrivateController {
                                @Positive @PathVariable Long eventId,
                                @RequestBody @Valid EventFullDto updateForEvent) {
         EventFullDto eventFullDto = eventService.updatePrivate(userId, eventId, updateForEvent);
-        log.info("EVENT was UPDATED: {}", eventFullDto);
+        log.info("PRIVATE ACCESS. EVENT was UPDATED: {}", eventFullDto);
         return eventFullDto;
     }
 
@@ -77,7 +77,10 @@ public class EventPrivateController {
     List<ParticipationRequestDto> getRequestsPrivate(@Positive @PathVariable Long userId,
                                                      @Positive @PathVariable Long eventId) {
         List<ParticipationRequestDto> participationRequestDtoList = requestService.getRequestsListPrivate(userId, eventId);
-        log.info("{} EVENTS is FOUND", participationRequestDtoList.size());
+        log.info("PRIVATE ACCESS. {} EVENTS is FOUND", participationRequestDtoList.size());
+
+        // НЕ РЕАЛИЗОВАНО
+
         return participationRequestDtoList;
         //В случае, если по заданным фильтрам не найдено ни одного запроса, возвращает пустой список
     }
@@ -89,7 +92,8 @@ public class EventPrivateController {
                                                          @RequestBody @Valid EventRequestStatusUpdateRequest requestDto) {
         EventRequestStatusUpdateResult resultOfRequests
             = requestService.updateResultRequestsListPrivate(userId, eventId, requestDto);
-        //log.info("{} EVENTS is FOUND", resultOfRequests.size());
+        log.info("PRIVATE ACCESS. {} WAS CONFIRMED & {} WAS DECLINED", resultOfRequests.getConfirmedRequests().size(),
+            resultOfRequests.getRejectedRequests().size());
         return resultOfRequests;
     }
 }

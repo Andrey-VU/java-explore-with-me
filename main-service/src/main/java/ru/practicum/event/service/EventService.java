@@ -5,8 +5,6 @@ import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
-import ru.practicum.event.model.Event;
-import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.model.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +21,7 @@ public interface EventService {
 
     List<EventFullDto> getPublicEvents(String text, Boolean paid, List<Category> categories, LocalDateTime rangeStart,
                                        LocalDateTime rangeEnd, Boolean onlyAvailable, SortBy sort, Integer from,
-                                       Integer size);
+                                       Integer size, HttpServletRequest request);
     EventFullDto getPublic(Long id, HttpServletRequest request);
 
     List<EventShortDto> getListPrivate(Long userId,Integer from, Integer size);
@@ -34,8 +32,4 @@ public interface EventService {
 
     EventFullDto updatePrivate(Long userId, Long eventId, EventFullDto updateForEvent);
 
-    List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId);
-
-
-    Event getEventById(Long eventId);
 }

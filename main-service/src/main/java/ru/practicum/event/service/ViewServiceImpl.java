@@ -29,14 +29,16 @@ public class ViewServiceImpl implements ViewService{
     @Override
     public Long getViewsById(Long eventId) {
         Set<String> uris = new HashSet<>();
-        uris.add("/events/" + eventId);
+        uris.add("/events" + "/" + eventId);
         ResponseEntity<Object> views = statsClient.viewStatistics(
             LocalDateTime.now().minusYears(10),
             LocalDateTime.now().plusYears(10),
             uris,
             true);
         String[] body = views.getBody().toString().split("\"hits\": ");
-        return Long.valueOf(body[1]);
+        if (body.length == 1) {
+            return 0L;
+        } else return Long.valueOf(body[1]);
     }
 
     @Override

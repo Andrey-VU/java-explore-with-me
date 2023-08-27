@@ -18,6 +18,8 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 @EqualsAndHashCode
 @Table(name = "requests", schema = "public")
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

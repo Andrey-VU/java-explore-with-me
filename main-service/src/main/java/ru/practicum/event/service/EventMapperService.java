@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.CategoryService;
+import ru.practicum.category.repo.CategoryRepo;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
@@ -15,6 +16,7 @@ import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
 import ru.practicum.exception.EwmConflictException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.service.RequestService;
 import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
@@ -35,6 +37,7 @@ public class EventMapperService {
     private final EventMapper eventMapper;
     private final UserMapper userMapper;
     private final RequestService requestService;
+    private final CategoryRepo categoryRepo;
 
     User makeUser(Long userId) {
         return userMapper.makeUserFromDto(userService.get(userId));
@@ -42,7 +45,7 @@ public class EventMapperService {
 
     Long addViews(Long eventId) {
         Long views = viewService.getViewsById(eventId);
-        log.info("Событие Id {} было просмотрено {} раз", eventId, views);
+        log.info("Получена информация от StatsService: Событие Id {} было просмотрено {} раз", eventId, views);
         return views;
     }
 
@@ -77,11 +80,9 @@ public class EventMapperService {
     }
 
     public Event prepareForAdminUpdate(Event eventFromRepo, UpdateEventAdminRequest updateRequestDto) {
-        if (eventMapper.makeFullDto(eventFromRepo).equals(eventMapper.makeUpdateAdmin(updateRequestDto))) {
-            log.info("Пакет обновлений идентичен содержанию сохранённого События. Обновление не требуется");
-            throw new EwmConflictException("Обновления не выполнено: входящий пакет не содержит новой информации");
-        }
-        if (!updateRequestDto.getEventDate().minusHours(1).isBefore(eventFromRepo.getPublishedOn())) {
+
+        if (updateRequestDto.getEventDate()!= null && eventFromRepo.getPublishedOn() != null
+            && !updateRequestDto.getEventDate().minusHours(1).isBefore(eventFromRepo.getPublishedOn())) {
             log.warn("Событие не может быть обновлено. Конфликт дат");
             throw new EwmConflictException("Изменяемое событие должно начинаться позже, чем через час после публикации!");
         }
@@ -93,9 +94,57 @@ public class EventMapperService {
             && eventFromRepo.getState().equals(EventState.PUBLISHED)
             || eventFromRepo.getState().equals(EventState.CANCELED)) {
             log.warn("Cобытие можно отклонить, только если оно еще не опубликовано");
-            throw new EwmConflictException("Cобытие можно отклонить, только если оно еще не опубликовано");
+            throw new EwmConflictException("Cобытие не опубликовано. Отклонение не применимо");
         }
-        return updateFieldsWithoutState(eventFromRepo, eventMapper.makeUpdateAdmin(updateRequestDto));
+        return makeAdminUpdate(eventFromRepo, updateRequestDto);
+    }
+
+    private Event makeAdminUpdate(Event eventFromRepo, UpdateEventAdminRequest updateRequestDto) {
+        if (updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)) {
+            eventFromRepo.setState(EventState.CANCELED);
+        } else if (updateRequestDto.getStateAction().equals(StateActionAdmin.PUBLISH_EVENT)) {
+            eventFromRepo.setState(EventState.PUBLISHED);
+            eventFromRepo.setPublishedOn(LocalDateTime.now());
+        }
+
+        if (updateRequestDto.getPaid() != null && !eventFromRepo.getPaid().equals(updateRequestDto.getPaid())) {
+            eventFromRepo.setPaid(updateRequestDto.getPaid());
+        }
+        if (updateRequestDto.getEventDate() != null && !eventFromRepo.getEventDate().equals(updateRequestDto.getEventDate())){
+            eventFromRepo.setEventDate(updateRequestDto.getEventDate());
+        }
+        if (updateRequestDto.getAnnotation() != null && !eventFromRepo.getAnnotation().equals(updateRequestDto.getAnnotation())){
+            eventFromRepo.setAnnotation(updateRequestDto.getAnnotation());
+        }
+        if (updateRequestDto.getCategory() != null
+            && !eventFromRepo.getCategory().getId().equals(updateRequestDto.getCategory())){
+            eventFromRepo.setCategory(categoryRepo.findById(updateRequestDto.getCategory())
+                .orElseThrow(() -> new NotFoundException("Category id " + updateRequestDto.getCategory()
+                    + "НЕ ОБНАРУЖЕНА!")));
+        }
+        if (updateRequestDto.getDescription() != null
+            && !eventFromRepo.getDescription().equals(updateRequestDto.getDescription())){
+            eventFromRepo.setDescription(updateRequestDto.getDescription());
+        }
+        if (updateRequestDto.getTitle() != null && !eventFromRepo.getTitle().equals(updateRequestDto.getTitle())){
+            eventFromRepo.setTitle(updateRequestDto.getTitle());
+        }
+        if (updateRequestDto.getLocation() != null
+            && !eventFromRepo.getLocation().equals(updateRequestDto.getLocation())){
+            eventFromRepo.setLocation(updateRequestDto.getLocation());
+        }
+        if (updateRequestDto.getParticipantLimit() != null
+            && !eventFromRepo.getParticipantLimit().equals(updateRequestDto.getParticipantLimit())){
+            eventFromRepo.setParticipantLimit(updateRequestDto.getParticipantLimit());
+        }
+        if (updateRequestDto.getRequestModeration() != null
+            && eventFromRepo.getRequestModeration() != updateRequestDto.getRequestModeration()){
+            eventFromRepo.setRequestModeration(updateRequestDto.getRequestModeration());
+        }
+
+        log.info("ADMIN ACCESS. Event id {} ready for update", eventFromRepo.getId() );
+        return eventFromRepo;
+
     }
 
     private Event updateFieldsWithoutState(Event eventFromRepo, EventFullDto makeUpdate) {
@@ -112,7 +161,7 @@ public class EventMapperService {
             eventFromRepo.setAnnotation(makeUpdate.getAnnotation());
         }
         if (makeUpdate.getCategory().getId() != null
-            && eventFromRepo.getCategory().getId() != (makeUpdate.getCategory().getId())){
+            && !eventFromRepo.getCategory().getId().equals(makeUpdate.getCategory().getId())){
             eventFromRepo.setCategory(categoryMapper.makeCategoryFromCategoryDto(makeUpdate.getCategory()));
         }
         if (makeUpdate.getDescription() != null
@@ -123,11 +172,11 @@ public class EventMapperService {
             eventFromRepo.setTitle(makeUpdate.getTitle());
         }
         if (makeUpdate.getLocation() != null
-            && eventFromRepo.getLocation().getId() != makeUpdate.getLocation().getId()){
+            && !eventFromRepo.getLocation().equals(makeUpdate.getLocation())){
             eventFromRepo.setLocation(makeUpdate.getLocation());
         }
         if (makeUpdate.getParticipantLimit() != null
-            && eventFromRepo.getParticipantLimit() != makeUpdate.getParticipantLimit()){
+            && !eventFromRepo.getParticipantLimit().equals(makeUpdate.getParticipantLimit())){
             eventFromRepo.setParticipantLimit(makeUpdate.getParticipantLimit());
         }
         if (makeUpdate.getRequestModeration() != null

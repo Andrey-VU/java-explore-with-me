@@ -13,10 +13,10 @@ import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.Location;
 import ru.practicum.event.repo.EventRepo;
 import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.user.model.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +32,6 @@ public class EventServiceImpl implements EventService{
     private final EventRepo eventRepo;
     private final EventMapper eventMapper;
     private final EventMapperService mapperService;
-    private final QueryHelper queryHelper;
 
     @Override
     public EventFullDto updateAdmin(Long eventId, UpdateEventAdminRequest updateRequestDto) {
@@ -60,7 +59,21 @@ public class EventServiceImpl implements EventService{
         }
 
         List<Event> events = new ArrayList<>();
-        events = queryHelper.methodsDispatcher(events, users, states, categories, rangeStart, rangeEnd, from, size);
+
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<Long> usersIds = new ArrayList<>();
+        List<Long> categoriesIds = new ArrayList<>();
+
+        for (User user : users) {
+            usersIds.add(user.getId());
+        }
+
+        for (Category category : categories) {
+            categoriesIds.add(category.getId());
+        }
+
+        events = eventRepo.getEventsAdmin(usersIds, states, categoriesIds, rangeStart, rangeEnd, pageRequest)
+            .stream().collect(Collectors.toList());
 
         log.info("Найдено {} событий в соответствии с заданными критериями", events.size());
 
@@ -73,8 +86,29 @@ public class EventServiceImpl implements EventService{
     @Override
     public List<EventFullDto> getPublicEvents(String text, Boolean paid, List<Category> categories,
                                               LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
-                                              SortBy sort, Integer from, Integer size) {
-        return null;
+                                              SortBy sort, Integer from, Integer size, HttpServletRequest request) {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            log.warn("Указано некорректное время начала/окончания интервала");
+            throw new EwmConflictException("Задан некорректный временной интервал для поиска");
+        }
+
+        List<Event> events = new ArrayList<>();
+
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<Long> categoriesIds = new ArrayList<>();
+
+        for (Category category : categories) {
+            categoriesIds.add(category.getId());
+        }
+        events = eventRepo.getEventsPublic(text, categoriesIds, paid, rangeStart, rangeEnd, pageRequest)
+            .stream().collect(Collectors.toList());
+
+        log.info("PUBLIC ACCESS. Найдено {} событий в соответствии с заданными критериями", events.size());
+
+        return events.stream()
+            .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.addViews(event.getId()),
+                mapperService.getParticipants(event.getId())))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -85,9 +119,9 @@ public class EventServiceImpl implements EventService{
         Long views = mapperService.addViews(event.getId());
         Long participants = mapperService.getParticipants(event.getId());
         EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(event, views, participants);
-        log.info("Найдено событие {}", fullDto);
+        log.info("PUBLIC ACCESS. Найдено событие {}", fullDto);
         mapperService.saveStatistics(request);
-        log.info("Статистика о просмотре события id {} отправлена в StatService", eventId);
+        log.info("PUBLIC ACCESS. Статистика о просмотре события id {} отправлена в StatService", eventId);
         return fullDto;
     }
 
@@ -99,7 +133,7 @@ public class EventServiceImpl implements EventService{
             .map(event -> eventMapper.makeShortDto(event))
             .collect(Collectors.toList());
 
-        log.info("Найдено {} событий, инициированных пользователем Id {}", eventShortDtoList.size(), initiatorId );
+        log.info("PRIVATE ACCESS. Найдено {} событий, инициированных пользователем Id {}", eventShortDtoList.size(), initiatorId );
         return eventShortDtoList;
     }
 
@@ -107,10 +141,11 @@ public class EventServiceImpl implements EventService{
     public EventFullDto create(Long initiatorId, NewEventDto dto) {
         User initiator = mapperService.makeUser(initiatorId);
         Category category = mapperService.makeCategory(dto.getCategory());
-        mapperService.saveLocation(dto);
+        Location locationFromDB = mapperService.saveLocation(dto);
+        dto.setLocation(locationFromDB);
 
-        Event newEvent = eventRepo.save(eventMapper.makeEvent(dto, initiator, category));
-        log.info("{} - CREATED", eventMapper.makeShortDto(newEvent));
+        Event newEvent = eventRepo.save(eventMapper.makeEvent(dto, initiator, category, LocalDateTime.now()));
+        log.info("PRIVATE ACCESS. {} - CREATED", eventMapper.makeShortDto(newEvent));
         return eventMapper.makeFullDtoAddViewsAndParticipants(newEvent, null, null);
     }
 
@@ -124,7 +159,7 @@ public class EventServiceImpl implements EventService{
 
         EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(eventFromRepo, views, participants);
         isUserTheInitiator(initiatorId, fullDto);
-        log.info("Event {} is FOUND!", fullDto);
+        log.info("PRIVATE ACCESS. Event {} is FOUND!", fullDto);
         return fullDto;
     }
 
@@ -133,20 +168,16 @@ public class EventServiceImpl implements EventService{
         Event eventFromRepo = eventMapper.makeEventFromFullDto(getFullDtoEventPrivate(initiatorId, eventId));
         Event prepareForUpdate = mapperService.prepareForUpdate(eventFromRepo, updateForEvent);
         Event updatedEvent = eventRepo.save(prepareForUpdate);
-        log.info("{} - UPDATED", eventMapper.makeShortDto(updatedEvent));
+        log.info("PRIVATE ACCESS. {} - UPDATED", eventMapper.makeShortDto(updatedEvent));
         return eventMapper.makeFullDto(updatedEvent);
     }
 
-    @Override
-    public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
-        return null;
-    }
-
-    @Override
-    public Event getEventById(Long eventId) {
-        return eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие " + eventId
-            + " не найдено!"));
-    }
+//   @Override
+//    public Event getEventById(Long eventId) {
+//        log.info("");
+//        return eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие " + eventId
+//            + " не найдено!"));
+//    }
 
     private void isUserTheInitiator(Long initiatorId, EventFullDto fullDto) {
         if (initiatorId != fullDto.getInitiator().getId()) {

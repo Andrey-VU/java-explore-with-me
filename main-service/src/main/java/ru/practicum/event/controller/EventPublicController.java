@@ -39,7 +39,7 @@ public class EventPublicController {
     // должен фиксироваться сервисом статистики.
 
     @GetMapping
-    List<EventShortDto> getEvents(@RequestParam(required = false) String text, //maxLength: 7000, minLength: 1
+    List<EventFullDto> getEvents(@RequestParam(required = false) String text, //maxLength: 7000, minLength: 1
                                   @RequestParam(required = false) Boolean paid,
                                   @RequestParam(required = false) List<Category> categories,
                   @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
@@ -50,7 +50,7 @@ public class EventPublicController {
                   @Positive @RequestParam (defaultValue = "10") Integer size,
                   HttpServletRequest request) {
 
-        log.info("EventPublicController: Получен запрос с ip адреса {} на просмотр всех событий по фильтрам: \n" +
+        log.info("PUBLIC ACCESS. EventPublicController: Получен запрос с ip адреса {} на просмотр всех событий по фильтрам: \n" +
             "- text: {};\n" +
             "- categories: {};\n" +
             "- paid: {};\n" +
@@ -62,13 +62,14 @@ public class EventPublicController {
             "- size: {}.",
             request.getRemoteAddr(), text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
-        return null;
+        return eventService.getPublicEvents(text, paid, categories, rangeStart, rangeEnd, onlyAvailable, sort, from,
+            size, request);
     }
 
     @GetMapping("/{id}")
     EventFullDto get(@PathVariable Long id, HttpServletRequest request){
         EventFullDto eventFullDto = eventService.getPublic(id, request);
-        log.info("Найдено событие: {}", eventFullDto);
+        log.info("PUBLIC ACCESS. Найдено событие: {}", eventFullDto);
         return eventFullDto;
     }
 }

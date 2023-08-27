@@ -131,7 +131,8 @@ public class requestServiceImpl implements RequestService{
 
     @Override
     public ParticipationRequestDto createPrivate(Long requesterId, Long eventId) {
-        Event event = eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено!"));
+        Event event = eventRepo.findById(eventId).orElseThrow(()
+            -> new NotFoundException("Событие Id " + eventId + " не найдено!"));
         User user = userService.getUserById(requesterId);
         requestValidation(user, event);
 
@@ -139,6 +140,7 @@ public class requestServiceImpl implements RequestService{
             .created(LocalDateTime.now())
             .requester(user)
             .event(event)
+            .status(RequestState.PENDING)
             .build();
 
         if (!event.getRequestModeration()) {

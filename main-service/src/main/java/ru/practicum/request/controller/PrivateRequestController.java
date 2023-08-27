@@ -2,6 +2,7 @@ package ru.practicum.request.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.request.dto.ParticipationRequestDto;
@@ -26,10 +27,12 @@ public class PrivateRequestController {
     }
 
     @PostMapping
-    ParticipationRequestDto create(@Positive @PathVariable Long requesterId, Long eventId){
+    @ResponseStatus(HttpStatus.CREATED)
+    ParticipationRequestDto create(@Positive @PathVariable Long userId,
+                                   @RequestParam Long eventId){
         log.info("Принят запрос от пользователя Id {} на создание заявки для участие в мероприятии Id {}",
-            requesterId, eventId);
-        return requestService.createPrivate(requesterId, eventId);
+            userId, eventId);
+        return requestService.createPrivate(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")

@@ -1,11 +1,12 @@
 package ru.practicum.event.repo;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.practicum.category.model.Category;
+import org.springframework.data.jpa.repository.Query;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.model.Event;
-import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,75 +17,22 @@ public interface EventRepo extends JpaRepository<Event, Long> {
 
     List<Event> findAllByInitiatorId(Long userId, PageRequest pageRequest);
 
-    List<Event> findAllByEventDateBefore(LocalDateTime rangeEnd, PageRequest pageRequest);
+    @Query("SELECT e FROM Event e " +
+        "WHERE (e.initiator.id IN (:users) OR :users IS NULL) " +
+        "AND (e.state IN (:states) OR :states IS NULL) " +
+        "AND (e.category.id IN (:categories) OR :categories IS NULL) " +
+        "AND (e.eventDate BETWEEN :rangeStart AND :rangeEnd) " +
+        "ORDER BY e.createdOn DESC")
+    Page<Event> getEventsAdmin(List<Long> users, List<EventState> states, List<Long> categories,
+                               LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
 
-    List<Event> findAllByEventDateAfter(LocalDateTime rangeStart, PageRequest pageRequest);
-
-    List<Event> findAllByEventDateAfterAndEventDateBefore(LocalDateTime rangeStart,
-                                                          LocalDateTime rangeEnd,
-                                                          PageRequest pageRequest);
-
-    List<Event> findAllByInitiatorIn(List<User> users, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryIn(List<Category> categories, PageRequest pageRequest);
-
-    List<Event> findAllByStateIn(List<EventState> states, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryInAndInitiatorIn(List<Category> categories, List<User> users, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorIn(List<EventState> states, List<User> users, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorInAndCategoryInAndEventDateBefore(List<EventState> states, List<User> users,
-                                                                              List<Category> categories,
-                                                                              LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByInitiatorInAndEventDateAfterAndEventDateBefore(List<User> users, LocalDateTime rangeStart, 
-                                                                        LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryInAndInitiatorInAndEventDateAfterAndEventDateBefore(List<Category> categories,
-                                                                                     List<User> users, 
-                                                                                     LocalDateTime rangeStart, 
-                                                                                     LocalDateTime rangeEnd,
-                                                                                     PageRequest pageRequest);
-
-    List<Event> findAllByInitiatorInAndEventDateAfter(List<User> users, LocalDateTime rangeStart, PageRequest pageRequest);
-
-    List<Event> findAllByInitiatorInAndEventDateBefore(List<User> users, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndEventDateAfterAndEventDateBefore(List<EventState> states, LocalDateTime rangeStart, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndEventDateAfter(List<EventState> states, LocalDateTime rangeStart, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndEventDateBefore(List<EventState> states, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryInAndEventDateAfter(List<Category> categories, LocalDateTime rangeStart, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryInAndEventDateBefore(List<Category> categories, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryInAndEventDateAfterAndEventDateBefore(List<Category> categories, LocalDateTime rangeStart, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryInAndInitiatorInAndEventDateBefore(List<Category> categories, List<User> users, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByCategoryInAndInitiatorInAndEventDateAfter(List<Category> categories, List<User> users, LocalDateTime rangeStart, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorInAndEventDateBefore(List<EventState> states, List<User> users, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorInAndEventDateAfter(List<EventState> states, List<User> users, LocalDateTime rangeStart, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorInAndEventDateAfterAndEventDateBefore(List<EventState> states, List<User> users, LocalDateTime rangeStart, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorInAndCategoryIn(List<EventState> states, List<User> users, List<Category> categories, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorInAndCategoryInAndEventDateAfter(List<EventState> states, List<User> users, List<Category> categories, LocalDateTime rangeStart, PageRequest pageRequest);
-
-    List<Event> findAllByStateInAndInitiatorInAndCategoryInAndEventDateAfterAndEventDateBefore(List<EventState> states, List<User> users, List<Category> categories,
-                                                                                               LocalDateTime rangeStart, LocalDateTime rangeEnd, PageRequest pageRequest);
-
-//    List<Event> getEventsAdmin(List<User> users,
-//                               List<EventState> states,
-//                               List<Category> categories,
-//                               LocalDateTime rangeStart,
-//                               LocalDateTime rangeEnd,
-//                               Integer from,
-//                               Integer size);
+    @Query("SELECT e FROM Event e " +
+        "WHERE ((LOWER(e.annotation) LIKE CONCAT('%',lower(:text),'%') " +
+        "OR LOWER(e.description) LIKE CONCAT('%',lower(:text),'%')) " +
+        "OR :text IS NULL ) " +
+        "AND (e.category.id IN (:categories) OR :categories IS NULL) " +
+        "AND (e.paid IN (:paid) OR :paid IS NULL) " +
+        "AND (e.eventDate BETWEEN :rangeStart AND :rangeEnd)")
+    Page<Event> getEventsPublic(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                                LocalDateTime rangeEnd, Pageable pageable);
 }
