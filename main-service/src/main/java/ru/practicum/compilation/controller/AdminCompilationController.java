@@ -3,6 +3,7 @@ package ru.practicum.compilation.controller;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -12,6 +13,7 @@ import ru.practicum.compilation.service.CompilationService;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 
+@Validated
 @RestController
 @Slf4j
 @AllArgsConstructor
@@ -23,22 +25,23 @@ public class AdminCompilationController {
     @ResponseStatus(HttpStatus.CREATED)
     CompilationDto create(@Valid @RequestBody NewCompilationDto newCompilationDto) {
         log.info("ADMIN ACCESS: Получен запрос на создание коллекции из {} событий", newCompilationDto.getEvents().size());
-
-        return null;
+        CompilationDto compilationDto = compilationService.create(newCompilationDto);
+        return compilationDto;
     }
 
     @DeleteMapping("/{compId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(@Positive @PathVariable Long compId) {
         log.info("Получен запрос на удалении коллекции событий Id {}", compId);
-
+        compilationService.delete(compId);
     }
 
     @PatchMapping("/{compId}")
     CompilationDto update(@Positive @PathVariable Long compId,
                           @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest){
-        log.info("Получен запрос на обновление коллекции событий Id {}", compId );
-
-        return null;
+        log.info("Получен запрос на обновление коллекции событий Id {}", compId);
+        CompilationDto compilationDto = compilationService.update(compId, updateCompilationRequest);
+        log.info("Коллекция событий Id {} обновлена", compId);
+        return compilationDto;
     }
 }
