@@ -30,6 +30,6 @@ public interface EventService {
 
     EventFullDto getFullDtoEventPrivate(Long userId, Long eventId);
 
-    EventFullDto updatePrivate(Long userId, Long eventId, EventFullDto updateForEvent);
+    EventFullDto updatePrivate(Long userId, Long eventId, UpdateEventUserRequest updateForEvent);
 
 }

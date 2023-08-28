@@ -13,6 +13,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "compilations", schema = "public")
 public class Compilation {
     @Id

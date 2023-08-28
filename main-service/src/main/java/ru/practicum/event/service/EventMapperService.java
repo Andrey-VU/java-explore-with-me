@@ -7,11 +7,12 @@ import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.CategoryService;
 import ru.practicum.category.repo.CategoryRepo;
-import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.UpdateEventAdminRequest;
+import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.StateActionAdmin;
+import ru.practicum.event.enums.StateActionUser;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
@@ -57,16 +58,19 @@ public class EventMapperService {
         viewService.saveHit(request.getRequestURI(), request.getLocalAddr());
     }
 
-    public Event prepareForUpdate(Event eventFromRepo, EventFullDto updateForEvent) {
-        if (eventMapper.makeFullDto(eventFromRepo).equals(updateForEvent)){
-            log.info("Пакет обновлений идентичен содержанию сохранённого События. Обновление не требуется");
-            throw new EwmConflictException("Обновления не выполнено: входящий пакет не содержит новой информации");
-        }
-        if (!eventFromRepo.getState().equals(EventState.PENDING)) {
+    public Event prepareForUpdate(Event eventFromRepo, UpdateEventUserRequest updateForEvent) {
+
+        if (eventFromRepo.getState().equals(EventState.PUBLISHED)) {
             log.warn("Событие не может быть обновлено. Конфликт состояния");
             throw new EwmConflictException("изменить можно только отмененные события или события в состоянии " +
                 "ожидания модерации");
         }
+        if (updateForEvent.getStateAction().equals(StateActionUser.CANCEL_REVIEW)) {
+            eventFromRepo.setState(EventState.CANCELED);
+        } else if (updateForEvent.getStateAction().equals(StateActionUser.SEND_TO_REVIEW)) {
+            eventFromRepo.setState(EventState.PENDING);
+        }
+
         if (updateForEvent.getEventDate() != null &&
             updateForEvent.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             log.warn("Событие не может быть обновлено. Конфликт дат");
@@ -148,9 +152,9 @@ public class EventMapperService {
 
     }
 
-    private Event updateFieldsWithoutState(Event eventFromRepo, EventFullDto makeUpdate) {
+    private Event updateFieldsWithoutState(Event eventFromRepo, UpdateEventUserRequest makeUpdate) {
 
-        int needsForUpdateCounter = 9;
+        int needsForUpdateCounter = 9;  // ВОЗМОЖНО ЭТО НЕ НУЖНО И СЛЕДУЕТ УДАЛИТЬ
 
         if (makeUpdate.getPaid() != null && !eventFromRepo.getPaid().equals(makeUpdate.getPaid())) {
             eventFromRepo.setPaid(makeUpdate.getPaid());
@@ -165,8 +169,10 @@ public class EventMapperService {
         } else needsForUpdateCounter -= 1;
 
         if (makeUpdate.getCategory() != null
-            && !eventFromRepo.getCategory().getId().equals(makeUpdate.getCategory().getId())){
-            eventFromRepo.setCategory(categoryMapper.makeCategoryFromCategoryDto(makeUpdate.getCategory()));
+            && !eventFromRepo.getCategory().getId().equals(makeUpdate.getCategory())){
+
+            eventFromRepo.setCategory(categoryRepo.findById(makeUpdate.getCategory())
+                .orElseThrow(() -> new NotFoundException("Искомая категория не обнаружена")));
         } else needsForUpdateCounter -= 1;
 
         if (makeUpdate.getDescription() != null
@@ -193,12 +199,8 @@ public class EventMapperService {
             eventFromRepo.setRequestModeration(makeUpdate.getRequestModeration());
         } else needsForUpdateCounter -= 1;
 
-        if (needsForUpdateCounter > 0) {
-            log.info("Event id {} ready for update", eventFromRepo.getId());
-        } else {
-            log.info("Обновление для события id {} НЕ СОДЕРЖИТ ОБНОВЛЕНИЙ", eventFromRepo.getId());
-            eventFromRepo.setState(EventState.CANCELED);
-        }
+        log.info("Event id {} ready for update", eventFromRepo.getId());
+
         return eventFromRepo;
     }
 

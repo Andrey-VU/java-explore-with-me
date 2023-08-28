@@ -1,7 +1,7 @@
 package ru.practicum.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
+import lombok.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.model.Location;
 
@@ -10,19 +10,23 @@ import java.time.LocalDateTime;
 
 import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 
-@Data
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class NewEventDto {
-    @NotBlank
+
+    @NotBlank(message = "поле annotation не может быть пустым")
     @Size(min = 20, max = 2000)
     private String annotation;
 
-    @Positive
-    private Long category;
-
-    @NotBlank
+    @NotBlank(message = "поле description не может быть пустым")
     @Size(min = 20, max = 7000)
     private String description;
 
+    @Positive
+    private Long category;
     @NotNull
     @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;

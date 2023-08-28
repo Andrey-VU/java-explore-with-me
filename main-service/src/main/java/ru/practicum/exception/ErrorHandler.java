@@ -32,6 +32,7 @@ public class ErrorHandler {
     @ExceptionHandler({
     MethodArgumentTypeMismatchException.class,
     ConstraintViolationException.class,
+    EwmBadDataException.class,
     MethodArgumentNotValidException.class,
     MissingServletRequestParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -39,7 +40,7 @@ public class ErrorHandler {
         return ApiError.builder()
             .message(e.getMessage())
             .status(HttpStatus.BAD_REQUEST)
-            .reason("Incorrectly made request.")
+            .reason("Incorrectly made request")
             .timestamp(LocalDateTime.now())
             .build();
     }

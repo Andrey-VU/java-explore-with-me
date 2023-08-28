@@ -1,20 +1,18 @@
 package ru.practicum.event.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.UpdateEventAdminRequest;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
 import ru.practicum.event.repo.EventRepo;
+import ru.practicum.exception.EwmBadDataException;
 import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.model.User;
@@ -27,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class EventServiceImpl implements EventService{
     private final EventRepo eventRepo;
     private final EventMapper eventMapper;
@@ -92,7 +90,7 @@ public class EventServiceImpl implements EventService{
                                               SortBy sort, Integer from, Integer size, HttpServletRequest request) {
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             log.warn("Указано некорректное время начала/окончания интервала");
-            throw new EwmConflictException("Задан некорректный временной интервал для поиска");
+            throw new EwmBadDataException("Задан некорректный временной интервал для поиска");
         }
 
         List<Event> events = new ArrayList<>();
@@ -167,23 +165,14 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    public EventFullDto updatePrivate(Long initiatorId, Long eventId, EventFullDto updateForEvent) {
+    public EventFullDto updatePrivate(Long initiatorId, Long eventId, UpdateEventUserRequest updateForEvent) {
         Event eventFromRepo = eventMapper.makeEventFromFullDto(getFullDtoEventPrivate(initiatorId, eventId));
         Event prepareForUpdate = mapperService.prepareForUpdate(eventFromRepo, updateForEvent);
-
-
 
         Event updatedEvent = eventRepo.save(prepareForUpdate);
         log.info("PRIVATE ACCESS. {} - UPDATED", eventMapper.makeShortDto(updatedEvent));
         return eventMapper.makeFullDto(updatedEvent);
     }
-
-//   @Override
-//    public Event getEventById(Long eventId) {
-//        log.info("");
-//        return eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие " + eventId
-//            + " не найдено!"));
-//    }
 
     private void isUserTheInitiator(Long initiatorId, EventFullDto fullDto) {
         if (initiatorId != fullDto.getInitiator().getId()) {
