@@ -28,11 +28,6 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 public class EventAdminController {
     EventService eventService;
 
-    // нужно настроить добавление, изменение и удаление категорий для событий;
-    // должна появиться возможность добавлять, удалять и закреплять на главной странице подборки мероприятий;
-    // требуется наладить модерацию событий, размещённых пользователями, — публикация или отклонение;
-    // также должно быть настроено управление пользователями — добавление, активация, просмотр и удаление.
-
     @GetMapping
     List<EventFullDto> getAdmin(@RequestParam(required = false) List<User> users,
                                 @RequestParam(required = false) List<EventState> states,
@@ -50,10 +45,4 @@ public class EventAdminController {
                              @Valid @RequestBody UpdateEventAdminRequest updateRequest){
         return eventService.updateAdmin(eventId, updateRequest);
     }
-
-
-    //Редактирование данных любого события администратором. Валидация данных не требуется. Обратите внимание:
-    //дата начала изменяемого события должна быть не ранее чем за час от даты публикации. (Ожидается код ошибки 409)
-    //событие можно публиковать, только если оно в состоянии ожидания публикации (Ожидается код ошибки 409)
-    //событие можно отклонить, только если оно еще не опубликовано (Ожидается код ошибки 409)
 }

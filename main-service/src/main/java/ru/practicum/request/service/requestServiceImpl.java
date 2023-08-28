@@ -143,7 +143,7 @@ public class requestServiceImpl implements RequestService{
             .status(RequestState.PENDING)
             .build();
 
-        if (!event.getRequestModeration()) {
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             request.setStatus(RequestState.CONFIRMED);
         }
 
@@ -190,7 +190,8 @@ public class requestServiceImpl implements RequestService{
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new EwmConflictException("Нельзя участвовать в неопубликованном событии");
         }
-        if (getConfirmedRequestsById(event.getId()) >= event.getParticipantLimit()) {
+        if (event.getParticipantLimit() != 0 &&
+            getConfirmedRequestsById(event.getId()) >= event.getParticipantLimit()) {
             throw new EwmConflictException("Достигнут лимит участников в данном мероприятии");
         }
     }

@@ -95,7 +95,8 @@ public class EventMapperService {
             log.warn("Событие не может быть опубликовано. Конфликт состояния");
             throw new EwmConflictException("Опубликовать можно события в статусе ожидания публикации");
         }
-        if (updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)
+        if (updateRequestDto.getStateAction() !=null
+            && updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)
             && eventFromRepo.getState().equals(EventState.PUBLISHED)
             || eventFromRepo.getState().equals(EventState.CANCELED)) {
             log.warn("Cобытие можно отклонить, только если оно еще не опубликовано");

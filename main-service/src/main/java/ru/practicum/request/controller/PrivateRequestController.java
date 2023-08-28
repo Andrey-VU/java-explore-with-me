@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.request.dto.ParticipationRequestDto;
 import ru.practicum.request.service.RequestService;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -24,14 +23,13 @@ public class PrivateRequestController {
     List<ParticipationRequestDto> get(@Positive @PathVariable Long userId) {
         log.info("Принят запрос на получение списка всех заявок пользователя Id {}", userId);
         return requestService.getPrivate(userId);
-        // Получение информации о заявках текущего пользователя на участие в чужих событиях
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ParticipationRequestDto create(@PathVariable Long userId,
-                                   @RequestParam Long eventId){
-        log.info("Принят запрос от пользователя Id {} на создание заявки для участие в мероприятии Id {}",
+    ParticipationRequestDto create(@Positive @PathVariable Long userId,
+                                   @Positive @RequestParam Long eventId){
+        log.info("Принят запрос от пользователя Id {} на участие в мероприятии Id {}",
             userId, eventId);
         return requestService.createPrivate(userId, eventId);
     }

@@ -117,12 +117,14 @@ public class EventServiceImpl implements EventService{
         Event event = eventRepo.findByIdAndPublishedOnBefore(eventId, LocalDateTime.now())
             .orElseThrow(() -> new NotFoundException("Событие id " + eventId + " - не найдено"));
 
+        log.info("PUBLIC ACCESS. Найдено событие id {}", eventId);
+
         Long views = mapperService.addViews(event.getId());
         Long participants = mapperService.getParticipants(event.getId());
-        EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(event, views, participants);
-        log.info("PUBLIC ACCESS. Найдено событие {}", fullDto);
         mapperService.saveStatistics(request);
         log.info("PUBLIC ACCESS. Статистика о просмотре события id {} отправлена в StatService", eventId);
+        EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(event, views, participants);
+
         return fullDto;
     }
 
