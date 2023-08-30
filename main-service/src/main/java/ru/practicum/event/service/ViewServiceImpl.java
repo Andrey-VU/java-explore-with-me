@@ -31,8 +31,8 @@ public class ViewServiceImpl implements ViewService{
         Set<String> uris = new HashSet<>();
         uris.add("/events" + "/" + eventId);
         ResponseEntity<Object> views = statsClient.viewStatistics(
-            LocalDateTime.now().minusYears(10),
-            LocalDateTime.now().plusYears(10),
+            LocalDateTime.now().minusYears(100),
+            LocalDateTime.now().plusYears(100),
             uris,
             true);
         String[] body = views.getBody().toString().split("\"hits\": ");

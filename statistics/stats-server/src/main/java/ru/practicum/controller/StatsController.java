@@ -3,15 +3,18 @@ package ru.practicum.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.service.StatsService;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+@Validated
 @RestController
 @Slf4j
 public class StatsController {
@@ -23,7 +26,7 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addStats(@RequestBody EndpointHit inputDto) {
+    public void addStats(@Valid @RequestBody EndpointHit inputDto) {
         log.info("Add new statistic for ip {} - Started", inputDto.getIp());
         statsService.addStats(inputDto);
     }

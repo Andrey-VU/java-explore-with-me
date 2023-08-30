@@ -13,7 +13,6 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
 import ru.practicum.event.repo.EventRepo;
 import ru.practicum.exception.EwmBadDataException;
-import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.model.User;
 
@@ -43,7 +42,7 @@ public class EventServiceImpl implements EventService{
         Event preparedEventForUpdate = mapperService.prepareForAdminUpdate(eventFromRepo, updateRequestDto);
         Event updatedEvent = eventRepo.save(preparedEventForUpdate);
 
-        Long views = mapperService.addViews(eventId);
+        Long views = mapperService.getViews(eventId);
         Long participants = mapperService.getParticipants(eventId);
         EventFullDto updatedFullDto = eventMapper.makeFullDtoAddViewsAndParticipants(updatedEvent, views, participants);
 
@@ -56,30 +55,62 @@ public class EventServiceImpl implements EventService{
 
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             log.warn("Указано некорректное время начала/окончания интервала");
-            throw new EwmConflictException("Задан некорректный временной интервал для поиска");
+            throw new EwmBadDataException("Задан некорректный временной интервал для поиска");
+        }
+
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now().minusYears(100);
+        }
+        if (rangeEnd == null) {
+            rangeEnd = LocalDateTime.now().plusYears(100);
         }
 
         List<Event> events = new ArrayList<>();
-
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
         List<Long> usersIds = new ArrayList<>();
         List<Long> categoriesIds = new ArrayList<>();
 
-        for (User user : users) {
-            usersIds.add(user.getId());
+        if (users != null) {
+            for (User user : users) {
+                usersIds.add(user.getId());
+            }
         }
 
-        for (Category category : categories) {
-            categoriesIds.add(category.getId());
+        if (categories != null) {
+            for (Category category : categories) {
+                categoriesIds.add(category.getId());
+            }
         }
 
-        events = eventRepo.getEventsAdmin(usersIds, states, categoriesIds, rangeStart, rangeEnd, pageRequest)
-            .stream().collect(Collectors.toList());
+        if (states == null) {
+            states = List.of(EventState.PENDING);
+        } else if (states.isEmpty()) {
+            states.add(EventState.PENDING);
+        }
+
+//        events = eventRepo.getEventsAdmin(usersIds, states, categoriesIds, rangeStart, rangeEnd, pageRequest)
+//            .stream().collect(Collectors.toList());
+
+        if (users == null && categories == null) {
+            events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateIn(rangeStart, rangeEnd, states,
+                pageRequest);
+        } else if (users != null && categories == null) {
+            events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdIn(rangeStart,
+                rangeEnd, states, usersIds,pageRequest);
+        }
+        if (users != null && categories != null) {
+            events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdInAndCategoryIdIn(rangeStart,
+                rangeEnd, states, usersIds, categoriesIds, pageRequest);
+        } else if (users == null && categories != null) {
+            events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateInAndCategoryIdIn(rangeStart,
+                rangeEnd, states, categoriesIds, pageRequest);
+        }
+
 
         log.info("Найдено {} событий в соответствии с заданными критериями", events.size());
 
         return events.stream()
-            .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.addViews(event.getId()),
+            .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.getViews(event.getId()),
                 mapperService.getParticipants(event.getId())))
             .collect(Collectors.toList());
     }
@@ -93,13 +124,22 @@ public class EventServiceImpl implements EventService{
             throw new EwmBadDataException("Задан некорректный временной интервал для поиска");
         }
 
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now().minusYears(100);
+        }
+        if (rangeEnd == null) {
+            rangeEnd = LocalDateTime.now().plusYears(100);
+        }
+
         List<Event> events = new ArrayList<>();
 
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
         List<Long> categoriesIds = new ArrayList<>();
 
-        for (Category category : categories) {
-            categoriesIds.add(category.getId());
+        if (categories != null) {
+            for (Category category : categories) {
+                categoriesIds.add(category.getId());
+            }
         }
         events = eventRepo.getEventsPublic(text, categoriesIds, paid, rangeStart, rangeEnd, pageRequest)
             .stream().collect(Collectors.toList());
@@ -107,7 +147,7 @@ public class EventServiceImpl implements EventService{
         log.info("PUBLIC ACCESS. Найдено {} событий в соответствии с заданными критериями", events.size());
 
         return events.stream()
-            .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.addViews(event.getId()),
+            .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.getViews(event.getId()),
                 mapperService.getParticipants(event.getId())))
             .collect(Collectors.toList());
     }
@@ -119,11 +159,12 @@ public class EventServiceImpl implements EventService{
 
         log.info("PUBLIC ACCESS. Найдено событие id {}", eventId);
 
-        Long views = mapperService.addViews(event.getId());
+        Long views = mapperService.getViews(event.getId());
         Long participants = mapperService.getParticipants(event.getId());
+        EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(event, views, participants);
+
         mapperService.saveStatistics(request);
         log.info("PUBLIC ACCESS. Статистика о просмотре события id {} отправлена в StatService", eventId);
-        EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(event, views, participants);
 
         return fullDto;
     }
@@ -147,6 +188,8 @@ public class EventServiceImpl implements EventService{
         Location locationFromDB = mapperService.saveLocation(dto);
         dto.setLocation(locationFromDB);
 
+        mapperService.isEventDateValid(dto.getEventDate());
+
         Event newEvent = eventRepo.save(eventMapper.makeEvent(dto, initiator, category, LocalDateTime.now()));
         log.info("PRIVATE ACCESS. {} - CREATED", eventMapper.makeShortDto(newEvent));
         return eventMapper.makeFullDtoAddViewsAndParticipants(newEvent, null, null);
@@ -157,7 +200,7 @@ public class EventServiceImpl implements EventService{
         Event eventFromRepo = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException("Event Id " + eventId + "is NOT FOUND!"));
 
-        Long views = mapperService.addViews(eventId);
+        Long views = mapperService.getViews(eventId);
         Long participants = mapperService.getParticipants(eventId);
 
         EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(eventFromRepo, views, participants);

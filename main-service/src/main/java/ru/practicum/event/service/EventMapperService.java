@@ -16,6 +16,7 @@ import ru.practicum.event.enums.StateActionUser;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
+import ru.practicum.exception.EwmBadDataException;
 import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.request.service.RequestService;
@@ -44,7 +45,7 @@ public class EventMapperService {
         return userMapper.makeUserFromDto(userService.get(userId));
     }
 
-    Long addViews(Long eventId) {
+    Long getViews(Long eventId) {
         Long views = viewService.getViewsById(eventId);
         log.info("Получена информация от StatsService: Событие Id {} было просмотрено {} раз", eventId, views);
         return views;
@@ -65,16 +66,18 @@ public class EventMapperService {
             throw new EwmConflictException("изменить можно только отмененные события или события в состоянии " +
                 "ожидания модерации");
         }
-        if (updateForEvent.getStateAction().equals(StateActionUser.CANCEL_REVIEW)) {
+        if (updateForEvent.getStateAction() != null
+            && updateForEvent.getStateAction().equals(StateActionUser.CANCEL_REVIEW)) {
             eventFromRepo.setState(EventState.CANCELED);
-        } else if (updateForEvent.getStateAction().equals(StateActionUser.SEND_TO_REVIEW)) {
+        } else if (updateForEvent.getStateAction() != null
+            && updateForEvent.getStateAction().equals(StateActionUser.SEND_TO_REVIEW)) {
             eventFromRepo.setState(EventState.PENDING);
         }
 
         if (updateForEvent.getEventDate() != null &&
             updateForEvent.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             log.warn("Событие не может быть обновлено. Конфликт дат");
-            throw new EwmConflictException("Дата и время на которые намечено событие не может быть раньше, чем " +
+            throw new EwmBadDataException("Дата и время на которые намечено событие не может быть раньше, чем " +
                 "через два часа от текущего момента");
         }
         return updateFieldsWithoutState(eventFromRepo, updateForEvent);
@@ -89,8 +92,14 @@ public class EventMapperService {
         if (updateRequestDto.getEventDate()!= null && eventFromRepo.getPublishedOn() != null
             && !updateRequestDto.getEventDate().minusHours(1).isBefore(eventFromRepo.getPublishedOn())) {
             log.warn("Событие не может быть обновлено. Конфликт дат");
-            throw new EwmConflictException("Изменяемое событие должно начинаться позже, чем через час после публикации!");
+            throw new EwmBadDataException("Изменяемое событие должно начинаться позже, чем через час после публикации!");
         }
+        if (updateRequestDto.getEventDate()!= null &&
+            updateRequestDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
+            log.warn("Событие не может быть обновлено. Конфликт дат");
+            throw new EwmBadDataException("Начало события должно быть позже, чем через 2 часа от данного момента!");
+        }
+
         if (!eventFromRepo.getState().equals(EventState.PENDING)) {
             log.warn("Событие не может быть опубликовано. Конфликт состояния");
             throw new EwmConflictException("Опубликовать можно события в статусе ожидания публикации");
@@ -106,9 +115,11 @@ public class EventMapperService {
     }
 
     private Event makeAdminUpdate(Event eventFromRepo, UpdateEventAdminRequest updateRequestDto) {
-        if (updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)) {
+        if (updateRequestDto.getStateAction() != null
+            && updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)) {
             eventFromRepo.setState(EventState.CANCELED);
-        } else if (updateRequestDto.getStateAction().equals(StateActionAdmin.PUBLISH_EVENT)) {
+        } else if (updateRequestDto.getStateAction() != null
+            && updateRequestDto.getStateAction().equals(StateActionAdmin.PUBLISH_EVENT)) {
             eventFromRepo.setState(EventState.PUBLISHED);
             eventFromRepo.setPublishedOn(LocalDateTime.now());
         }
@@ -155,50 +166,48 @@ public class EventMapperService {
 
     private Event updateFieldsWithoutState(Event eventFromRepo, UpdateEventUserRequest makeUpdate) {
 
-        int needsForUpdateCounter = 9;  // ВОЗМОЖНО ЭТО НЕ НУЖНО И СЛЕДУЕТ УДАЛИТЬ
-
         if (makeUpdate.getPaid() != null && !eventFromRepo.getPaid().equals(makeUpdate.getPaid())) {
             eventFromRepo.setPaid(makeUpdate.getPaid());
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getEventDate() != null && !eventFromRepo.getEventDate().equals(makeUpdate.getEventDate())){
             eventFromRepo.setEventDate(makeUpdate.getEventDate());
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getAnnotation() != null && !eventFromRepo.getAnnotation().equals(makeUpdate.getAnnotation())){
             eventFromRepo.setAnnotation(makeUpdate.getAnnotation());
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getCategory() != null
             && !eventFromRepo.getCategory().getId().equals(makeUpdate.getCategory())){
 
             eventFromRepo.setCategory(categoryRepo.findById(makeUpdate.getCategory())
                 .orElseThrow(() -> new NotFoundException("Искомая категория не обнаружена")));
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getDescription() != null
             && !eventFromRepo.getDescription().equals(makeUpdate.getDescription())){
             eventFromRepo.setDescription(makeUpdate.getDescription());
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getTitle() != null && !eventFromRepo.getTitle().equals(makeUpdate.getTitle())){
             eventFromRepo.setTitle(makeUpdate.getTitle());
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getLocation() != null
             && !eventFromRepo.getLocation().equals(makeUpdate.getLocation())){
             eventFromRepo.setLocation(makeUpdate.getLocation());
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getParticipantLimit() != null
             && !eventFromRepo.getParticipantLimit().equals(makeUpdate.getParticipantLimit())){
             eventFromRepo.setParticipantLimit(makeUpdate.getParticipantLimit());
-        } else needsForUpdateCounter -= 1;
+        }
 
         if (makeUpdate.getRequestModeration() != null
             && eventFromRepo.getRequestModeration() != makeUpdate.getRequestModeration()){
             eventFromRepo.setRequestModeration(makeUpdate.getRequestModeration());
-        } else needsForUpdateCounter -= 1;
+        }
 
         log.info("Event id {} ready for update", eventFromRepo.getId());
 
@@ -209,6 +218,11 @@ public class EventMapperService {
         return locationService.save(dto.getLocation());
     }
 
+    public void isEventDateValid(LocalDateTime eventDate) {
+        if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new EwmBadDataException("Начало событие должно быть хотя бы на 2 часа позднее настоящего момента");
+        }
+    }
 }
 
 

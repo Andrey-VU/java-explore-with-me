@@ -37,7 +37,9 @@ public class EventAdminController {
                   @PositiveOrZero @RequestParam (required = false, defaultValue = "0") Integer from,
                   @Positive @RequestParam (required = false, defaultValue = "10") Integer size) {
 
-        return eventService.getAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        List<EventFullDto> fullDtoList = eventService.getAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        log.info("Найдено {} событий", fullDtoList.size());
+        return fullDtoList;
     }
 
     @PatchMapping("/{eventId}")
