@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @AllArgsConstructor
 @RequestMapping("/users/{userId}/requests")
-public class PrivateRequestController {
+public class RequestPrivateController {
     private final RequestService requestService;
 
     @GetMapping
@@ -31,14 +31,16 @@ public class PrivateRequestController {
                                    @Positive @RequestParam Long eventId){
         log.info("Принят запрос от пользователя Id {} на участие в мероприятии Id {}",
             userId, eventId);
-        return requestService.createPrivate(userId, eventId);
+        ParticipationRequestDto requestDto = requestService.createPrivate(userId, eventId);
+        log.info("Заявка создана {}", requestDto);
+        return requestDto;
     }
 
     @PatchMapping("/{requestId}/cancel")
-    ParticipationRequestDto requestCancel(@Positive @PathVariable Long userId,
-                                          @Positive @PathVariable Long requestId){
+    void requestCancel(@Positive @PathVariable Long userId,
+                       @Positive @PathVariable Long requestId){
         log.info("Принят запрос от пользователя Id {} на отмену заявки Id {}", userId, requestId);
-        return requestService.cancelPrivate(userId, requestId);
+        requestService.cancelPrivate(userId, requestId);
     }
 
 

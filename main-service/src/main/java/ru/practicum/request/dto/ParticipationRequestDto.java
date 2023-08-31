@@ -1,6 +1,7 @@
 package ru.practicum.request.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Builder;
 import lombok.Data;
 import ru.practicum.request.enums.RequestState;
 

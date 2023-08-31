@@ -51,8 +51,8 @@ public class EventMapperService {
         return views;
     }
 
-    public Long getParticipants(Long eventId) {
-        return requestService.getConfirmedRequestsById(eventId);
+    public Long getParticipants(Event event) {
+        return requestService.getConfirmedRequests(event);
     }
 
     public void saveStatistics(HttpServletRequest request) {

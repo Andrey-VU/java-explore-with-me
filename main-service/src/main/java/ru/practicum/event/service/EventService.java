@@ -5,6 +5,8 @@ import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
+import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.user.model.User;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,5 +33,4 @@ public interface EventService {
     EventFullDto getFullDtoEventPrivate(Long userId, Long eventId);
 
     EventFullDto updatePrivate(Long userId, Long eventId, UpdateEventUserRequest updateForEvent);
-
 }

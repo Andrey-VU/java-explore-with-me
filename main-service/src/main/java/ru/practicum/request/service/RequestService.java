@@ -1,5 +1,6 @@
 package ru.practicum.request.service;
 
+import ru.practicum.event.model.Event;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
@@ -13,5 +14,5 @@ public interface RequestService {
     ParticipationRequestDto cancelPrivate(Long userId, Long requestId);
     ParticipationRequestDto createPrivate(Long userId, Long requestDto);
     List<ParticipationRequestDto> getPrivate(Long userId);
-    Long getConfirmedRequestsById(Long eventId);
+    Long getConfirmedRequests(Event event);
 }

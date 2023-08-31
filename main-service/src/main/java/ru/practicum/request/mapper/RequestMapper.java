@@ -8,7 +8,6 @@ import ru.practicum.request.model.Request;
 @Mapper(componentModel = "spring")
 public interface RequestMapper {
 
-   // Request makeEntity(ParticipationRequestDto dto);
     @Mapping(target = "event", expression = "java(request.getEvent().getId())")
     @Mapping(target = "requester", expression = "java(request.getRequester().getId())")
     ParticipationRequestDto makeRequestDto(Request request);

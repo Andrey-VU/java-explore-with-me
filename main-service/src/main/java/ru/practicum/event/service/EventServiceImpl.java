@@ -1,6 +1,8 @@
 package ru.practicum.event.service;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -43,10 +45,9 @@ public class EventServiceImpl implements EventService{
         Event updatedEvent = eventRepo.save(preparedEventForUpdate);
 
         Long views = mapperService.getViews(eventId);
-        Long participants = mapperService.getParticipants(eventId);
-        EventFullDto updatedFullDto = eventMapper.makeFullDtoAddViewsAndParticipants(updatedEvent, views, participants);
+        Long participants = mapperService.getParticipants(eventFromRepo);
 
-        return updatedFullDto;
+        return eventMapper.makeFullDtoAddViewsAndParticipants(updatedEvent, views, participants);
     }
 
     @Override
@@ -88,9 +89,6 @@ public class EventServiceImpl implements EventService{
             states.add(EventState.PENDING);
         }
 
-//        events = eventRepo.getEventsAdmin(usersIds, states, categoriesIds, rangeStart, rangeEnd, pageRequest)
-//            .stream().collect(Collectors.toList());
-
         if (users == null && categories == null) {
             events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateIn(rangeStart, rangeEnd, states,
                 pageRequest);
@@ -111,7 +109,7 @@ public class EventServiceImpl implements EventService{
 
         return events.stream()
             .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.getViews(event.getId()),
-                mapperService.getParticipants(event.getId())))
+                mapperService.getParticipants(event)))
             .collect(Collectors.toList());
     }
 
@@ -141,14 +139,13 @@ public class EventServiceImpl implements EventService{
                 categoriesIds.add(category.getId());
             }
         }
-        events = eventRepo.getEventsPublic(text, categoriesIds, paid, rangeStart, rangeEnd, pageRequest)
-            .stream().collect(Collectors.toList());
+        events = eventRepo.getEventsPublic(text, categoriesIds, paid, rangeStart, rangeEnd, pageRequest);
 
         log.info("PUBLIC ACCESS. Найдено {} событий в соответствии с заданными критериями", events.size());
 
         return events.stream()
             .map(event -> eventMapper.makeFullDtoAddViewsAndParticipants(event, mapperService.getViews(event.getId()),
-                mapperService.getParticipants(event.getId())))
+                mapperService.getParticipants(event)))
             .collect(Collectors.toList());
     }
 
@@ -160,7 +157,7 @@ public class EventServiceImpl implements EventService{
         log.info("PUBLIC ACCESS. Найдено событие id {}", eventId);
 
         Long views = mapperService.getViews(event.getId());
-        Long participants = mapperService.getParticipants(event.getId());
+        Long participants = mapperService.getParticipants(event);
         EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(event, views, participants);
 
         mapperService.saveStatistics(request);
@@ -201,7 +198,7 @@ public class EventServiceImpl implements EventService{
             .orElseThrow(() -> new NotFoundException("Event Id " + eventId + "is NOT FOUND!"));
 
         Long views = mapperService.getViews(eventId);
-        Long participants = mapperService.getParticipants(eventId);
+        Long participants = mapperService.getParticipants(eventFromRepo);
 
         EventFullDto fullDto = eventMapper.makeFullDtoAddViewsAndParticipants(eventFromRepo, views, participants);
         isUserTheInitiator(initiatorId, fullDto);

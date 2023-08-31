@@ -1,6 +1,7 @@
 package ru.practicum.event.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -80,6 +81,7 @@ public class EventPrivateController {
                                                          @Valid @RequestBody EventRequestStatusUpdateRequest requestDto) {
         EventRequestStatusUpdateResult resultOfRequests
             = requestService.updateResultRequestsListPrivate(userId, eventId, requestDto);
+
         if (resultOfRequests.getConfirmedRequests() != null) {
             log.info("PRIVATE ACCESS. {} WAS CONFIRMED", resultOfRequests.getConfirmedRequests().size());
         }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
@@ -23,6 +24,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public UserDto create(NewUserRequest newUserRequest) {
+        isUserNameFree(newUserRequest.getName());
         User user = userRepo.save(userMapper.makeUser(newUserRequest));
         log.info("User {} was saved in repo", user);
         return userMapper.makeDto(user);
@@ -48,7 +50,6 @@ public class UserServiceImpl implements UserService{
                 .map(user -> userMapper.makeDto(user))
                 .collect(Collectors.toList());
         }
-
         log.info("{} users was found", usersDto.size());
         return usersDto;
     }
@@ -63,5 +64,16 @@ public class UserServiceImpl implements UserService{
     public User getUserById(Long requesterId) {
         return userRepo.findById(requesterId)
             .orElseThrow(() -> new NotFoundException("Пользователь " + requesterId + " НЕ НАЙДЕН!"));
+    }
+
+    private void isUserNameFree(String name) {
+        List<String> namesOfUsers = new ArrayList<>();
+        for (User user : userRepo.findAll()) {
+            namesOfUsers.add(user.getName());
+        }
+        if (namesOfUsers.contains(name)) {
+            log.warn("попытка использовать занятое имя");
+            throw new EwmConflictException("Имя занято. Использовать повторно невозможно");
+        }
     }
 }

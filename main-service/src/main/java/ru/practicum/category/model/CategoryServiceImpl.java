@@ -8,6 +8,8 @@ import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.repo.CategoryRepo;
+import ru.practicum.event.repo.EventRepo;
+import ru.practicum.exception.EwmConflictException;
 import ru.practicum.exception.NotFoundException;
 
 import java.util.ArrayList;
@@ -19,10 +21,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService{
     private final CategoryRepo categoryRepo;
+    private final EventRepo eventRepo;
     private CategoryMapper categoryMapper;
 
     @Override
     public CategoryDto add(NewCategoryDto newCategoryDto) {
+
+        isNewNameFree(newCategoryDto.getName());
+
         Category category = categoryRepo.save(categoryMapper.makeCategory(newCategoryDto));
         CategoryDto dto = categoryMapper.makeDto(category);
         log.info("New category {} has been added", dto.getName());
@@ -32,6 +38,9 @@ public class CategoryServiceImpl implements CategoryService{
     @Override
     public CategoryDto update(Long id, NewCategoryDto newCategoryDto) {
         Category categoryFromRepo = categoryRepo.getReferenceById(id);
+
+        isNewNameFree(newCategoryDto.getName());
+
         if (newCategoryDto.getName().equals(categoryFromRepo.getName())) {
             log.warn("Обновление для категории {} идентично сохранённому значению.\n" +
                 "Обновление не выполнено!", categoryFromRepo.getName());
@@ -42,6 +51,19 @@ public class CategoryServiceImpl implements CategoryService{
             log.info("Имя \"{}\" категории id {} изменено на \"{}\"", oldName, id, categoryFromRepo.getName() );
         }
         return categoryMapper.makeDto(categoryFromRepo);
+    }
+
+    private void isNewNameFree(String name) {
+        List<String> categoryNamesFromRepo = new ArrayList<>();
+
+        for (Category category : categoryRepo.findAll()) {
+            categoryNamesFromRepo.add(category.getName());
+        }
+
+        if (categoryNamesFromRepo.contains(name)) {
+            log.warn("Нельзя присваивать категории не уникальное имя");
+            throw new EwmConflictException("Попытка присвоить категории уже существующее название");
+        }
     }
 
     @Override
@@ -78,7 +100,12 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     private boolean isConnectedWithEvent(Long id) {
+        if (eventRepo.findAll().stream()
+            .filter(event -> event.getCategory().getId().equals(id)).count() > 0)
+        {
+            log.warn("Попытка удалить категорию, которая задействована в опубликованных событиях");
+            throw new EwmConflictException("Категория используется. Удаление невозможно");
+        }
         return false;
     }
-//    ТРЕБУЕТСЯ ДОРАБОТКА МЕТОДА
 }
