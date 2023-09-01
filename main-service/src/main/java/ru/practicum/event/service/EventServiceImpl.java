@@ -53,7 +53,6 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventFullDto> getAdmin(List<User> users, List<EventState> states, List<Category> categories,
                                        LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size) {
 
@@ -117,7 +116,6 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventFullDto> getPublicEvents(String text, Boolean paid, List<Category> categories,
                                               LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
                                               SortBy sort, Integer from, Integer size, HttpServletRequest request) {
@@ -154,7 +152,6 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public EventFullDto getPublic(Long eventId, HttpServletRequest request) {
         Event event = eventRepo.findByIdAndPublishedOnBefore(eventId, LocalDateTime.now())
             .orElseThrow(() -> new NotFoundException("Событие id " + eventId + " - не найдено"));
@@ -172,7 +169,6 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<EventShortDto> getListPrivate(Long initiatorId, Integer from, Integer size) {
         List<EventShortDto> eventShortDtoList = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);

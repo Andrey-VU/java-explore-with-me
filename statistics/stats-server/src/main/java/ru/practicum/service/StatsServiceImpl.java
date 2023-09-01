@@ -3,6 +3,7 @@ package ru.practicum.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.mapper.StatsMapper;
@@ -28,6 +29,7 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<ViewStats> viewStatistics(LocalDateTime start, LocalDateTime end, Set<String> uris, boolean unique) {
+
         if (unique) {
             if (uris == null || uris.isEmpty()) {
                 return statsRepo.viewStatisticsUniqueIP(start, end);
@@ -36,8 +38,11 @@ public class StatsServiceImpl implements StatsService {
             if (uris == null || uris.isEmpty()) {
                 return statsRepo.viewAllStatistics(start, end);
             } else {
-                return statsRepo.viewAllStatisticsWithUris(start, end, uris);
+               return statsRepo.viewAllStatisticsWithUris(start, end, uris);
+//               return statsRepo.findAllByTimestampBeforeAndTimestampAfterAndUriIn(end, start, uris);
             }
         }
     }
 }
+
+//

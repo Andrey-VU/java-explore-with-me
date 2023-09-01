@@ -20,13 +20,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ViewServiceImpl implements ViewService{
     private static final String APP = "ewm-main-service";
-
     private final StatsClient statsClient;
-
-    @Override
-    public Map<Long, Long> getViews(List<Long> eventIds) {
-        return null;
-    }
 
     @Override
     public Long getViewsById(Long eventId) {

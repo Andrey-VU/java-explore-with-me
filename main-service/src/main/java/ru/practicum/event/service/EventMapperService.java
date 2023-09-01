@@ -114,7 +114,6 @@ public class EventMapperService {
         return makeAdminUpdate(eventFromRepo, updateRequestDto);
     }
 
-    @Transactional(readOnly = true)
     private Event makeAdminUpdate(Event eventFromRepo, UpdateEventAdminRequest updateRequestDto) {
         if (updateRequestDto.getStateAction() != null
             && updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)) {
@@ -165,8 +164,7 @@ public class EventMapperService {
 
     }
 
-    @Transactional(readOnly = true)
-    private Event updateFieldsWithoutState(Event eventFromRepo, UpdateEventUserRequest makeUpdate) {
+     private Event updateFieldsWithoutState(Event eventFromRepo, UpdateEventUserRequest makeUpdate) {
 
         if (makeUpdate.getPaid() != null && !eventFromRepo.getPaid().equals(makeUpdate.getPaid())) {
             eventFromRepo.setPaid(makeUpdate.getPaid());

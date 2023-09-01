@@ -39,6 +39,7 @@ public class StatsController {
         @RequestParam(defaultValue = "false", name = "unique") boolean unique) {
         log.info("STARTs viewing statistics with parameters: \n start {}, \n end {}, \n uris {}, \n unique {}",
             start, end, uris, unique);
-        return statsService.viewStatistics(start, end, uris, unique);
+        List<ViewStats> viewStatsList = statsService.viewStatistics(start, end, uris, unique);
+        return viewStatsList;
     }
 }

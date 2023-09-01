@@ -8,7 +8,6 @@ import java.util.Map;
 
 @Service
 public interface ViewService {
-    Map<Long, Long> getViews(List<Long> eventIds);
     Long getViewsById(Long eventId);
     ResponseEntity<Object> saveHit(String uri, String ip);
 }
