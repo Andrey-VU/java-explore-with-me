@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.mapper.CategoryMapper;
@@ -25,6 +26,7 @@ public class CategoryServiceImpl implements CategoryService{
     private CategoryMapper categoryMapper;
 
     @Override
+    @Transactional
     public CategoryDto add(NewCategoryDto newCategoryDto) {
 
         isNewNameFree(newCategoryDto.getName());
@@ -36,6 +38,7 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
+    @Transactional
     public CategoryDto update(Long id, NewCategoryDto newCategoryDto) {
         Category categoryFromRepo = categoryRepo.getReferenceById(id);
 
@@ -53,6 +56,7 @@ public class CategoryServiceImpl implements CategoryService{
         return categoryMapper.makeDto(categoryFromRepo);
     }
 
+    @Transactional(readOnly = true)
     private void isNewNameFree(String name) {
         List<String> categoryNamesFromRepo = new ArrayList<>();
 
@@ -67,6 +71,7 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Category category = categoryRepo.getReferenceById(id);
         if (!isConnectedWithEvent(id)) {
@@ -79,6 +84,7 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryDto> getPublic(int from, int size) {
         List<CategoryDto> categoryDtos = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
@@ -90,6 +96,7 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryDto getPublic(Long catId) {
         Category category = categoryRepo.findById(catId)
             .orElseThrow(() -> new NotFoundException("КАТЕГОРИЯ id "
@@ -99,6 +106,7 @@ public class CategoryServiceImpl implements CategoryService{
         return categoryMapper.makeDto(category);
     }
 
+    @Transactional(readOnly = true)
     private boolean isConnectedWithEvent(Long id) {
         if (eventRepo.findAll().stream()
             .filter(event -> event.getCategory().getId().equals(id)).count() > 0)

@@ -3,6 +3,7 @@ package ru.practicum.event.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.CategoryService;
@@ -36,7 +37,6 @@ public class EventMapperService {
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final CategoryMapper categoryMapper;
-    private final EventMapper eventMapper;
     private final UserMapper userMapper;
     private final RequestService requestService;
     private final CategoryRepo categoryRepo;
@@ -114,6 +114,7 @@ public class EventMapperService {
         return makeAdminUpdate(eventFromRepo, updateRequestDto);
     }
 
+    @Transactional(readOnly = true)
     private Event makeAdminUpdate(Event eventFromRepo, UpdateEventAdminRequest updateRequestDto) {
         if (updateRequestDto.getStateAction() != null
             && updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)) {
@@ -164,6 +165,7 @@ public class EventMapperService {
 
     }
 
+    @Transactional(readOnly = true)
     private Event updateFieldsWithoutState(Event eventFromRepo, UpdateEventUserRequest makeUpdate) {
 
         if (makeUpdate.getPaid() != null && !eventFromRepo.getPaid().equals(makeUpdate.getPaid())) {

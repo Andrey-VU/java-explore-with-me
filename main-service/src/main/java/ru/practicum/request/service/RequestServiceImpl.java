@@ -3,6 +3,7 @@ package ru.practicum.request.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repo.EventRepo;
@@ -34,6 +35,7 @@ public class RequestServiceImpl implements RequestService{
     private final RequestMapper requestMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено!"));
         userService.getUserById(userId);
@@ -52,6 +54,7 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateResultRequestsListPrivate(Long userId, Long eventId,
                                                                           EventRequestStatusUpdateRequest requestDto) {
 
@@ -131,6 +134,7 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancelPrivate(Long requesterId, Long requestId) {
         Request request = requestRepo.findById(requestId)
             .orElseThrow(() -> new NotFoundException("Запрос id " + requestId + "НЕ НАЙДЕН!"));
@@ -144,6 +148,7 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto createPrivate(Long requesterId, Long eventId) {
         Event event = eventRepo.findById(eventId).orElseThrow(()
             -> new NotFoundException("Событие Id " + eventId + " не найдено!"));
@@ -178,6 +183,7 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getPrivate(Long requesterId) {
         List<ParticipationRequestDto> participationRequestDtoList = new ArrayList<>();
         participationRequestDtoList = requestRepo.findAllByRequesterId(requesterId).stream()
@@ -188,6 +194,7 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Long getConfirmedRequests(Event event) {
         List<Request> requests = requestRepo.findAllByEventId(event.getId());
         Long confirmedRequests = requests.stream()
@@ -197,6 +204,7 @@ public class RequestServiceImpl implements RequestService{
         return confirmedRequests;
     }
 
+    @Transactional(readOnly = true)
     private void requestValidation(User requester, Event event) {
         List<Request> requests = requestRepo.findAll();
 

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.UpdateCompilationRequest;
@@ -30,6 +31,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventMapper eventMapper;
 
     @Override
+    @Transactional
     public CompilationDto create(NewCompilationDto newCompilationDto) {
         List<Event> events = makeListWithEvents(newCompilationDto.getEvents());
         Compilation compilation = compilationRepo.save(compilationMapper.makeEntity(newCompilationDto, events));
@@ -40,6 +42,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void delete(Long compId) {
         Compilation compilation = compilationRepo.findById(compId)
             .orElseThrow(()
@@ -49,6 +52,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CompilationDto> getAll(Boolean pinned, Integer from, Integer size) {
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
         List<Compilation> compilations;
@@ -67,6 +71,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CompilationDto get(Long compId) {
         Compilation compilation = compilationRepo.findById(compId)
             .orElseThrow(() -> new NotFoundException("Не найдена подборка событий id" + compId));
@@ -78,6 +83,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationDto update(Long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = compilationRepo.findById(compId)
             .orElseThrow(() -> new NotFoundException("Не найдена подборка событий id" + compId));
@@ -111,6 +117,7 @@ public class CompilationServiceImpl implements CompilationService {
         return eventShortDtos;
     }
 
+    @Transactional(readOnly = true)
     private List<Event> makeListWithEvents(List<Long> events) {
         List<Event> eventsEntity = new ArrayList<>();
         if (events != null) {
