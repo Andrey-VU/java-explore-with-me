@@ -24,7 +24,7 @@ public class AdminCompilationController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     CompilationDto create(@Valid @RequestBody NewCompilationDto newCompilationDto) {
-        log.info("ADMIN ACCESS: Получен запрос на создание коллекции из {} событий", newCompilationDto.getEvents().size());
+        log.info("ADMIN ACCESS: Получен запрос на создание коллекции {}", newCompilationDto.getTitle());
         CompilationDto compilationDto = compilationService.create(newCompilationDto);
         return compilationDto;
     }

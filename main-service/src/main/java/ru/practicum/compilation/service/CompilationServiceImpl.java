@@ -51,7 +51,11 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public List<CompilationDto> getAll(Boolean pinned, Integer from, Integer size) {
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
-        List<Compilation> compilations = compilationRepo.findAllByPinned(pinned, pageRequest);
+        List<Compilation> compilations;
+        if (pinned == null) {
+            compilations = compilationRepo.findAll(pageRequest).stream().collect(Collectors.toList());
+        } else compilations = compilationRepo.findAllByPinned(pinned, pageRequest);
+
         List<CompilationDto> compilationDtos = compilations.stream()
             .map(compilation
                 -> compilationMapper.makeDto(compilation, makeListWithEventShortDtos(compilation.getEvents())))
@@ -78,10 +82,10 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepo.findById(compId)
             .orElseThrow(() -> new NotFoundException("Не найдена подборка событий id" + compId));
         Compilation updatedCompilation = prepareForUpdateCompilation(compilation, updateCompilationRequest);
-        assert updatedCompilation != null;
+        updatedCompilation = compilationRepo.save(updatedCompilation);
         List<EventShortDto> events = makeListWithEventShortDtos(updatedCompilation.getEvents());
         CompilationDto compilationDto = compilationMapper.makeDto(updatedCompilation, events);
-        log.info("ОБНОЫЛЕНА подборка событий: id = {}, название: \"{}\" из {} событий", compId,
+        log.info("ОБНОВЛЕНА подборка событий: id = {}, название: \"{}\" из {} событий", compId,
             compilationDto.getTitle(), events.size());
         return compilationDto;
     }
@@ -93,8 +97,9 @@ public class CompilationServiceImpl implements CompilationService {
             List<Event> events = makeListWithEvents(updateCompilationRequest.getEvents());
             compilation.setEvents(events);
         }
-        if (updateCompilationRequest.getTitle() != null || !updateCompilationRequest.getTitle().isBlank())
+        if (updateCompilationRequest.getTitle() != null) {
             compilation.setTitle(updateCompilationRequest.getTitle());
+        }
         return compilation;
     }
 
@@ -108,8 +113,10 @@ public class CompilationServiceImpl implements CompilationService {
 
     private List<Event> makeListWithEvents(List<Long> events) {
         List<Event> eventsEntity = new ArrayList<>();
-        events.forEach(eventId -> eventsEntity.add(eventRepo.findById(eventId)
-            .orElseThrow(() -> new NotFoundException("Событие id " + eventId + " НЕ НАЙДЕНО"))));
+        if (events != null) {
+            events.forEach(eventId -> eventsEntity.add(eventRepo.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие id " + eventId + " НЕ НАЙДЕНО"))));
+        }
         return eventsEntity;
     }
 
