@@ -1,10 +1,12 @@
 package ru.practicum.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.mapper.StatsMapper;
+import ru.practicum.model.StatEntity;
 import ru.practicum.repo.StatsRepo;
 
 import java.time.LocalDateTime;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class StatsServiceImpl implements StatsService {
     private StatsRepo statsRepo;
@@ -19,7 +22,8 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public void addStats(EndpointHit inputDto) {
-        statsRepo.save(statsMapper.makeEntity(inputDto));
+        StatEntity entity = statsRepo.save(statsMapper.makeEntity(inputDto));
+        log.info("Статистика СОХРАНЕНА:{}", entity);
     }
 
     @Override

@@ -108,8 +108,8 @@ public class CompilationServiceImpl implements CompilationService {
 
     private List<Event> makeListWithEvents(List<Long> events) {
         List<Event> eventsEntity = new ArrayList<>();
-        events.stream().map(id -> eventsEntity.add(eventRepo.findById(id)
-            .orElseThrow(() -> new NotFoundException("Событие id " + id + " НЕ НАЙДЕНО"))));
+        events.forEach(eventId -> eventsEntity.add(eventRepo.findById(eventId)
+            .orElseThrow(() -> new NotFoundException("Событие id " + eventId + " НЕ НАЙДЕНО"))));
         return eventsEntity;
     }
 

@@ -37,10 +37,11 @@ public class RequestPrivateController {
     }
 
     @PatchMapping("/{requestId}/cancel")
-    void requestCancel(@Positive @PathVariable Long userId,
+    ParticipationRequestDto requestCancel(@Positive @PathVariable Long userId,
                        @Positive @PathVariable Long requestId){
         log.info("Принят запрос от пользователя Id {} на отмену заявки Id {}", userId, requestId);
-        requestService.cancelPrivate(userId, requestId);
+        ParticipationRequestDto resultDto = requestService.cancelPrivate(userId, requestId);
+        return resultDto;
     }
 
 

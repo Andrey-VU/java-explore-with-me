@@ -75,7 +75,7 @@ public class RequestServiceImpl implements RequestService{
         }
 
         //если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется
-        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+        if (!event.getRequestModeration() && event.getParticipantLimit() == 0) {
             requests.forEach(request -> request.setStatus(RequestState.CONFIRMED));
             requests.forEach(request -> requestRepo.save(request));
             log.info("Подтверждение заявок не требуется - отключена премодерация, " +
@@ -86,7 +86,8 @@ public class RequestServiceImpl implements RequestService{
 
         //нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие (Ожидается код ошибки 409)
         if (event.getParticipantLimit() <= participants){
-            //requests.forEach(request -> request.setStatus(RequestState.REJECTED));
+            requests.forEach(request -> request.setStatus(RequestState.REJECTED));
+            requests.forEach(request -> requestRepo.save(request));
             log.warn("Достигнут лимит по заявкам");
             throw new EwmConflictException("Достигнут лимит по заявкам");
         }
@@ -137,7 +138,8 @@ public class RequestServiceImpl implements RequestService{
             throw new NotFoundException("У пользователя id " + requesterId + " НЕ НАЙДЕН запрос id " + requestId);
         }
         request.setStatus(RequestState.CANCELED);
-        ParticipationRequestDto requestDto = requestMapper.makeRequestDto(requestRepo.save(request));
+        Request canceledRequest = requestRepo.save(request);
+        ParticipationRequestDto requestDto = requestMapper.makeRequestDto(canceledRequest);
         return requestDto;
     }
 
@@ -155,9 +157,14 @@ public class RequestServiceImpl implements RequestService{
             .status(RequestState.PENDING)
             .build();
 
-        if (event.getParticipantLimit() != 0 &&
+        if (!event.getRequestModeration() && getConfirmedRequests(event) < event.getParticipantLimit() ||
+                event.getParticipantLimit() == 0) {
+            request.setStatus(RequestState.CONFIRMED);
+            requestRepo.save(request);
+        } else if (event.getParticipantLimit() != 0 &&
             getConfirmedRequests(event) >= event.getParticipantLimit()) {
             request.setStatus(RequestState.REJECTED);
+            requestRepo.save(request);
             log.warn("Заявке присвоен статус REJECTED, поскольку превышен лимит участников мероприятия");
             throw new EwmConflictException("Лимит участников исчерпан");
         }
@@ -193,12 +200,7 @@ public class RequestServiceImpl implements RequestService{
     private void requestValidation(User requester, Event event) {
         List<Request> requests = requestRepo.findAll();
 
-        Long participants = getConfirmedRequests(event);
-        if (event.getParticipantLimit() <= participants) {
-            throw new EwmConflictException("Достигнут лимит заявок");
-        }
-
-        if (requests.stream()
+       if (requests.stream()
             .filter(request -> request.getRequester().equals(requester))
             .filter(request -> request.getEvent().equals(event)).count() == 1) {
             throw new EwmConflictException("Невозможно отправить запрос на участие в событии ПОВТОРНО");

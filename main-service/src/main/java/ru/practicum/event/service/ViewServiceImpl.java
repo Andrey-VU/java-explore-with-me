@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.client.StatsClient;
 import ru.practicum.dto.EndpointHit;
+import ru.practicum.dto.ViewStats;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -30,15 +31,16 @@ public class ViewServiceImpl implements ViewService{
     public Long getViewsById(Long eventId) {
         Set<String> uris = new HashSet<>();
         uris.add("/events" + "/" + eventId);
-        ResponseEntity<Object> views = statsClient.viewStatistics(
+        ResponseEntity<List<ViewStats>> views = statsClient.viewStatistics(
             LocalDateTime.now().minusYears(100),
             LocalDateTime.now().plusYears(100),
             uris,
             true);
-        String[] body = views.getBody().toString().split("\"hits\": ");
-        if (body.length == 1) {
-            return 0L;
-        } else return Long.valueOf(body[1]);
+        if (!views.getBody().isEmpty() && views.getBody() != null ) {
+            ViewStats body = views.getBody().get(0);
+            return body.getHits();
+        } else return 0L;
+
     }
 
     @Override
@@ -46,6 +48,7 @@ public class ViewServiceImpl implements ViewService{
         EndpointHit dto = EndpointHit.builder()
             .ip(ip)
             .uri(uri)
+            .timestamp(LocalDateTime.now())
             .app(APP)
             .build();
 
