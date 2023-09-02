@@ -143,6 +143,8 @@ public class EventServiceImpl implements EventService{
         }
         events = eventRepo.getEventsPublic(text, categoriesIds, paid, rangeStart, rangeEnd, pageRequest);
 
+        mapperService.saveStatistics(request);
+
         log.info("PUBLIC ACCESS. Найдено {} событий в соответствии с заданными критериями", events.size());
 
         return events.stream()

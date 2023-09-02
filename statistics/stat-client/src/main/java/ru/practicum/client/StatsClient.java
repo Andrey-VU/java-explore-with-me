@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
-import ru.practicum.exception.ValidationException;
+import ru.practicum.exception.EwmValidationException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -84,7 +84,7 @@ public class StatsClient extends BaseClient {
 
     private void validateInterval(LocalDateTime start, LocalDateTime end) {
         if (!start.isBefore(end)) {
-            throw new ValidationException("Начало интервала должно быть раньше его завершения!");
+            throw new EwmValidationException("Начало интервала должно быть раньше его завершения!");
         }
     }
 }

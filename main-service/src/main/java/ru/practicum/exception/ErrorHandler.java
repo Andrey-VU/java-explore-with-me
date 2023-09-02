@@ -13,7 +13,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 
-@Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
 
@@ -27,7 +26,6 @@ public class ErrorHandler {
             .timestamp(LocalDateTime.now())
             .build();
     }
-
 
     @ExceptionHandler({
     MethodArgumentTypeMismatchException.class,
@@ -55,15 +53,4 @@ public class ErrorHandler {
             .timestamp(LocalDateTime.now())
             .build();
     }
-
-
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public ApiError handleUnprocessedException(final Throwable e) {
-//        log.debug("Получен статус 500 Internal Server Error {}, {}",  e.getMessage(), e.getStackTrace());
-//        return new ApiError(
-//            e.getMessage()
-//        );
-//    }
-
 }

@@ -62,8 +62,12 @@ public class EventPublicController {
             "- size: {}.",
             request.getRemoteAddr(), text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
-        return eventService.getPublicEvents(text, paid, categories, rangeStart, rangeEnd, onlyAvailable, sort, from,
+        List<EventFullDto> foundEvents = eventService.getPublicEvents(text, paid, categories, rangeStart, rangeEnd, onlyAvailable, sort, from,
             size, request);
+
+        log.info("Найдено {} событий", foundEvents.size());
+
+        return foundEvents;
     }
 
     @GetMapping("/{id}")
