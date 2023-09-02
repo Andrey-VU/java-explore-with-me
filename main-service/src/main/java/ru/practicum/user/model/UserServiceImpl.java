@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @AllArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private UserMapper userMapper;
 
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserDto get(Long userId) {
         return userMapper.makeDto(userRepo.findById(userId)
-            .orElseThrow( () -> new NotFoundException("User id " + userId + " is NOT FOUND!")));
+            .orElseThrow(() -> new NotFoundException("User id " + userId + " is NOT FOUND!")));
     }
 
     @Override

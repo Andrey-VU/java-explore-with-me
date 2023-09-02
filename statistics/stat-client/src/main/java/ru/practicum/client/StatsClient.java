@@ -55,7 +55,7 @@ public class StatsClient extends BaseClient {
     }
 
     public ResponseEntity<List<ViewStats>> viewStatistics(LocalDateTime start, LocalDateTime end,
-                                                 Set<String> uris, Boolean unique) {
+                                                          Set<String> uris, Boolean unique) {
 
         validateInterval(start, end);
 

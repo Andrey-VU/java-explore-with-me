@@ -1,7 +1,5 @@
 package ru.practicum.exception;
 
-import lombok.Builder;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -28,11 +26,11 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({
-    MethodArgumentTypeMismatchException.class,
-    ConstraintViolationException.class,
-    EwmBadDataException.class,
-    MethodArgumentNotValidException.class,
-    MissingServletRequestParameterException.class})
+        MethodArgumentTypeMismatchException.class,
+        ConstraintViolationException.class,
+        EwmBadDataException.class,
+        MethodArgumentNotValidException.class,
+        MissingServletRequestParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(final Throwable e) {
         return ApiError.builder()

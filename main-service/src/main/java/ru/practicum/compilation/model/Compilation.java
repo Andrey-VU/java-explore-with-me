@@ -29,8 +29,8 @@ public class Compilation {
 
     @ManyToMany
     @JoinTable(name = "events_compilations",
-               joinColumns = @JoinColumn(name = "compilation_id", referencedColumnName = "id"),
-               inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "id"))
+        joinColumns = @JoinColumn(name = "compilation_id", referencedColumnName = "id"),
+        inverseJoinColumns = @JoinColumn(name = "event_id", referencedColumnName = "id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<Event> events;
 }

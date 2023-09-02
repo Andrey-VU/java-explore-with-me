@@ -7,9 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.enums.SortBy;
-import ru.practicum.event.model.Event;
 import ru.practicum.event.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,30 +38,34 @@ public class EventPublicController {
 
     @GetMapping
     List<EventFullDto> getEvents(@RequestParam(required = false) String text, //maxLength: 7000, minLength: 1
-                                  @RequestParam(required = false) Boolean paid,
-                                  @RequestParam(required = false) List<Category> categories,
-                  @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
-                  @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
-                  @RequestParam(defaultValue = "false") Boolean onlyAvailable,
-                  @RequestParam(required = false) SortBy sort,
-                  @PositiveOrZero @RequestParam (defaultValue = "0") Integer from,
-                  @Positive @RequestParam (defaultValue = "10") Integer size,
-                  HttpServletRequest request) {
+                                 @RequestParam(required = false) Boolean paid,
+                                 @RequestParam(required = false) List<Category> categories,
+                                 @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT)
+                                 LocalDateTime rangeStart,
+                                 @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT)
+                                 LocalDateTime rangeEnd,
+                                 @RequestParam(defaultValue = "false") Boolean onlyAvailable,
+                                 @RequestParam(required = false) SortBy sort,
+                                 @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                 @Positive @RequestParam(defaultValue = "10") Integer size,
+                                 HttpServletRequest request) {
 
-        log.info("PUBLIC ACCESS. EventPublicController: Получен запрос с ip адреса {} на просмотр всех событий по фильтрам: \n" +
-            "- text: {};\n" +
-            "- categories: {};\n" +
-            "- paid: {};\n" +
-            "- rangeStart: {};\n" +
-            "- rangeEnd: {};\n" +
-            "- onlyAvailable: {};\n" +
-            "- sort: {};\n" +
-            "- from: {};\n" +
-            "- size: {}.",
+        log.info(
+            "PUBLIC ACCESS. EventPublicController: Получен запрос с ip адреса {} на просмотр всех событий по фильтрам: \n" +
+                "- text: {};\n" +
+                "- categories: {};\n" +
+                "- paid: {};\n" +
+                "- rangeStart: {};\n" +
+                "- rangeEnd: {};\n" +
+                "- onlyAvailable: {};\n" +
+                "- sort: {};\n" +
+                "- from: {};\n" +
+                "- size: {}.",
             request.getRemoteAddr(), text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
-        List<EventFullDto> foundEvents = eventService.getPublicEvents(text, paid, categories, rangeStart, rangeEnd, onlyAvailable, sort, from,
-            size, request);
+        List<EventFullDto> foundEvents =
+            eventService.getPublicEvents(text, paid, categories, rangeStart, rangeEnd, onlyAvailable, sort, from,
+                size, request);
 
         log.info("Найдено {} событий", foundEvents.size());
 
@@ -71,7 +73,7 @@ public class EventPublicController {
     }
 
     @GetMapping("/{id}")
-    EventFullDto get(@PathVariable Long id, HttpServletRequest request){
+    EventFullDto get(@PathVariable Long id, HttpServletRequest request) {
         EventFullDto eventFullDto = eventService.getPublic(id, request);
         log.info("PUBLIC ACCESS. Найдено событие: {}", eventFullDto);
         return eventFullDto;

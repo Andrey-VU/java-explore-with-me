@@ -9,7 +9,6 @@ import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.model.Event;
 import ru.practicum.user.model.User;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Mapper(componentModel = "spring")
@@ -23,7 +22,10 @@ public interface EventMapper {
     @Mapping(target = "views", source = "views")
     @Mapping(target = "confirmedRequests", source = "participants")
     EventFullDto makeFullDtoAddViewsAndParticipants(Event event, Long views, Long participants);
+
     EventFullDto makeFullDto(Event event);
+
     EventShortDto makeShortDto(Event event);
+
     Event makeEventFromFullDto(EventFullDto fullDto);
 }

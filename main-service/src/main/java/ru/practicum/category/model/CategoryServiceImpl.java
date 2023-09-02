@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class CategoryServiceImpl implements CategoryService{
+public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepo categoryRepo;
     private final EventRepo eventRepo;
     private CategoryMapper categoryMapper;
@@ -51,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService{
             String oldName = categoryFromRepo.getName();
             categoryFromRepo.setName(newCategoryDto.getName());
             categoryFromRepo = categoryRepo.save(categoryFromRepo);
-            log.info("Имя \"{}\" категории id {} изменено на \"{}\"", oldName, id, categoryFromRepo.getName() );
+            log.info("Имя \"{}\" категории id {} изменено на \"{}\"", oldName, id, categoryFromRepo.getName());
         }
         return categoryMapper.makeDto(categoryFromRepo);
     }
@@ -76,8 +76,7 @@ public class CategoryServiceImpl implements CategoryService{
         if (!isConnectedWithEvent(id)) {
             categoryRepo.delete(category);
             log.info("Удаление категории {} ЗАВЕРШЕНО", category);
-        }
-        else {
+        } else {
             log.info("Категория связана с событиями и не может быть удалена");
         }
     }
@@ -97,7 +96,7 @@ public class CategoryServiceImpl implements CategoryService{
     public CategoryDto getPublic(Long catId) {
         Category category = categoryRepo.findById(catId)
             .orElseThrow(() -> new NotFoundException("КАТЕГОРИЯ id "
-            + catId + " не найдена"));
+                + catId + " не найдена"));
 
         log.info("Category {} is found", category.getName());
         return categoryMapper.makeDto(category);
@@ -105,8 +104,7 @@ public class CategoryServiceImpl implements CategoryService{
 
     private boolean isConnectedWithEvent(Long id) {
         if (eventRepo.findAll().stream()
-            .filter(event -> event.getCategory().getId().equals(id)).count() > 0)
-        {
+            .filter(event -> event.getCategory().getId().equals(id)).count() > 0) {
             log.warn("Попытка удалить категорию, которая задействована в опубликованных событиях");
             throw new EwmConflictException("Категория используется. Удаление невозможно");
         }

@@ -8,7 +8,7 @@ import ru.practicum.event.repo.LocationRepo;
 
 @Service
 @AllArgsConstructor
-public class LocationServiceImpl implements LocationService{
+public class LocationServiceImpl implements LocationService {
     private final LocationRepo locationRepo;
 
     @Override

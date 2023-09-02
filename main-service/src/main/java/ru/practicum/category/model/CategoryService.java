@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface CategoryService {
     CategoryDto add(NewCategoryDto newCategoryDto);
+
     CategoryDto update(Long id, NewCategoryDto newCategoryDto);
-    void delete (Long id);
+
+    void delete(Long id);
 
     List<CategoryDto> getPublic(int from, int size);
 

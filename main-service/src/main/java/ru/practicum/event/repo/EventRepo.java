@@ -1,6 +1,5 @@
 package ru.practicum.event.repo;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,14 +38,23 @@ public interface EventRepo extends JpaRepository<Event, Long> {
     List<Event> findAllByEventDateAfterAndEventDateBefore(LocalDateTime rangeStart, LocalDateTime rangeEnd);
 
     List<Event> findAllByEventDateAfterAndEventDateBeforeAndStateIn(LocalDateTime rangeStart,
-                LocalDateTime rangeEnd, List<EventState> states, PageRequest pageRequest);
+                                                                    LocalDateTime rangeEnd, List<EventState> states,
+                                                                    PageRequest pageRequest);
 
     List<Event> findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdIn(LocalDateTime rangeStart,
-                LocalDateTime rangeEnd, List<EventState> states, List<Long> usersIds, PageRequest pageRequest);
+                                                                                    LocalDateTime rangeEnd,
+                                                                                    List<EventState> states,
+                                                                                    List<Long> usersIds,
+                                                                                    PageRequest pageRequest);
 
-    List<Event> findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdInAndCategoryIdIn(LocalDateTime rangeStart,
-                LocalDateTime rangeEnd, List<EventState> states, List<Long> usersIds, List<Long> categoriesIds, PageRequest pageRequest);
+    List<Event> findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdInAndCategoryIdIn(
+        LocalDateTime rangeStart,
+        LocalDateTime rangeEnd, List<EventState> states, List<Long> usersIds, List<Long> categoriesIds,
+        PageRequest pageRequest);
 
     List<Event> findAllByEventDateAfterAndEventDateBeforeAndStateInAndCategoryIdIn(LocalDateTime rangeStart,
-                LocalDateTime rangeEnd, List<EventState> states, List<Long> categoriesIds, PageRequest pageRequest);
+                                                                                   LocalDateTime rangeEnd,
+                                                                                   List<EventState> states,
+                                                                                   List<Long> categoriesIds,
+                                                                                   PageRequest pageRequest);
 }

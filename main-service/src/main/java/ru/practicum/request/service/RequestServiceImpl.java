@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class RequestServiceImpl implements RequestService{
+public class RequestServiceImpl implements RequestService {
     private final EventRepo eventRepo;
     private final UserService userService;
     private final RequestRepo requestRepo;
@@ -39,7 +39,7 @@ public class RequestServiceImpl implements RequestService{
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено!"));
         userService.getUserById(userId);
 
-        if (event.getInitiator().getId() != userId){
+        if (event.getInitiator().getId() != userId) {
             log.warn("Пользователь id {} не является инициатором события id {}", userId, eventId);
             throw new NotFoundException("НЕ НАЙДЕНО событие id " + eventId + "у пользователя id " + userId);
         }
@@ -84,7 +84,7 @@ public class RequestServiceImpl implements RequestService{
                 .map(requestMapper::makeRequestDto).collect(Collectors.toList()), null);
         }
 
-        if (event.getParticipantLimit() <= participants){
+        if (event.getParticipantLimit() <= participants) {
             requests.forEach(request -> request.setStatus(RequestState.REJECTED));
             requests.forEach(request -> requestRepo.save(request));
             log.warn("Достигнут лимит по заявкам");
@@ -99,21 +99,23 @@ public class RequestServiceImpl implements RequestService{
                 requests.get(i).setStatus(RequestState.CONFIRMED);
                 Request confirmedRequest = requestRepo.save(requests.get(i));
                 requestDtoConfirmList.add(requestMapper.makeRequestDto(confirmedRequest));
+            } else {
+                requests.get(i).setStatus(RequestState.REJECTED);
+                Request confirmedRequest = requestRepo.save(requests.get(i));
+                requestDtoConfirmList.add(requestMapper.makeRequestDto(confirmedRequest));
             }
-            else {
-                 requests.get(i).setStatus(RequestState.REJECTED);
-                 Request confirmedRequest = requestRepo.save(requests.get(i));
-                 requestDtoConfirmList.add(requestMapper.makeRequestDto(confirmedRequest));
-                }
-            }
+        }
         return new EventRequestStatusUpdateResult(requestDtoConfirmList, requestDtoRejectList);
     }
 
-    private void filterForRequestWithIncorrectStatus(List<Request> requests, List<Long> requestsId, Long userId, Long eventId, EventRequestStatusUpdateRequest requestDto) {
+    private void filterForRequestWithIncorrectStatus(List<Request> requests, List<Long> requestsId, Long userId,
+                                                     Long eventId, EventRequestStatusUpdateRequest requestDto) {
 
-        List<Request> incorrectStatus = requests.stream().filter(request -> !request.getStatus().equals(RequestState.PENDING)).collect(
-            Collectors.toList());
-        List<Long> incorrectStatusIds = incorrectStatus.stream().map(request -> request.getId()).collect(Collectors.toList());
+        List<Request> incorrectStatus =
+            requests.stream().filter(request -> !request.getStatus().equals(RequestState.PENDING)).collect(
+                Collectors.toList());
+        List<Long> incorrectStatusIds =
+            incorrectStatus.stream().map(request -> request.getId()).collect(Collectors.toList());
         requestsId = requestsId.stream()
             .filter(id -> !incorrectStatusIds.contains(id))
             .collect(Collectors.toList());
@@ -157,7 +159,7 @@ public class RequestServiceImpl implements RequestService{
             .build();
 
         if (!event.getRequestModeration() && getConfirmedRequests(event) < event.getParticipantLimit() ||
-                event.getParticipantLimit() == 0) {
+            event.getParticipantLimit() == 0) {
             request.setStatus(RequestState.CONFIRMED);
             requestRepo.save(request);
         } else if (event.getParticipantLimit() != 0 &&
@@ -190,8 +192,8 @@ public class RequestServiceImpl implements RequestService{
     public Long getConfirmedRequests(Event event) {
         List<Request> requests = requestRepo.findAllByEventId(event.getId());
         Long confirmedRequests = requests.stream()
-                                     .filter(request -> request.getStatus().equals(RequestState.CONFIRMED))
-                                     .count();
+            .filter(request -> request.getStatus().equals(RequestState.CONFIRMED))
+            .count();
         log.info("Найдено {} подтверждённых участников у событие Id {}", confirmedRequests, event.getId());
         return confirmedRequests;
     }
@@ -199,7 +201,7 @@ public class RequestServiceImpl implements RequestService{
     private void requestValidation(User requester, Event event) {
         List<Request> requests = requestRepo.findAll();
 
-       if (requests.stream()
+        if (requests.stream()
             .filter(request -> request.getRequester().equals(requester))
             .filter(request -> request.getEvent().equals(event)).count() == 1) {
             throw new EwmConflictException("Невозможно отправить запрос на участие в событии ПОВТОРНО");

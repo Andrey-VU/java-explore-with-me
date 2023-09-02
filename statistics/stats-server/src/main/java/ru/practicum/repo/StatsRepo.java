@@ -41,5 +41,6 @@ public interface StatsRepo extends JpaRepository<StatEntity, Long> {
         "ORDER BY COUNT(DISTINCT s.ip) DESC")
     List<ViewStats> viewStatisticsUniqueIPWithUris(LocalDateTime start, LocalDateTime end, Set<String> uris);
 
-    List<ViewStats> findAllByTimestampBeforeAndTimestampAfterAndUriIn(LocalDateTime end, LocalDateTime start, Set<String> uris);
+    List<ViewStats> findAllByTimestampBeforeAndTimestampAfterAndUriIn(LocalDateTime end, LocalDateTime start,
+                                                                      Set<String> uris);
 }

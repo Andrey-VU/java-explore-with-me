@@ -1,8 +1,6 @@
 package ru.practicum.event.service;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -28,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class EventServiceImpl implements EventService{
+public class EventServiceImpl implements EventService {
     private final EventRepo eventRepo;
     private final EventMapper eventMapper;
     private final EventMapperService mapperService;
@@ -96,11 +94,12 @@ public class EventServiceImpl implements EventService{
                 pageRequest);
         } else if (users != null && categories == null) {
             events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdIn(rangeStart,
-                rangeEnd, states, usersIds,pageRequest);
+                rangeEnd, states, usersIds, pageRequest);
         }
         if (users != null && categories != null) {
-            events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdInAndCategoryIdIn(rangeStart,
-                rangeEnd, states, usersIds, categoriesIds, pageRequest);
+            events =
+                eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateInAndInitiatorIdInAndCategoryIdIn(rangeStart,
+                    rangeEnd, states, usersIds, categoriesIds, pageRequest);
         } else if (users == null && categories != null) {
             events = eventRepo.findAllByEventDateAfterAndEventDateBeforeAndStateInAndCategoryIdIn(rangeStart,
                 rangeEnd, states, categoriesIds, pageRequest);
@@ -178,7 +177,8 @@ public class EventServiceImpl implements EventService{
             .map(event -> eventMapper.makeShortDto(event))
             .collect(Collectors.toList());
 
-        log.info("PRIVATE ACCESS. Найдено {} событий, инициированных пользователем Id {}", eventShortDtoList.size(), initiatorId );
+        log.info("PRIVATE ACCESS. Найдено {} событий, инициированных пользователем Id {}", eventShortDtoList.size(),
+            initiatorId);
         return eventShortDtoList;
     }
 

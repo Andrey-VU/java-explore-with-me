@@ -15,8 +15,10 @@ import java.util.List;
 public interface CompilationMapper {
     @Mapping(target = "events", source = "events")
     Compilation makeEntity(NewCompilationDto newCompilationDto, List<Event> events);
+
     @Mapping(target = "events", source = "events")
     CompilationDto makeDto(Compilation compilation, List<EventShortDto> events);
+
     @Mapping(target = "events", source = "events")
     Compilation updateEntity(UpdateCompilationRequest updateCompilationRequest, List<Event> events);
 }

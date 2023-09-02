@@ -3,7 +3,6 @@ package ru.practicum.event.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.model.CategoryService;
@@ -14,7 +13,6 @@ import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.StateActionAdmin;
 import ru.practicum.event.enums.StateActionUser;
-import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.Location;
 import ru.practicum.exception.EwmBadDataException;
@@ -89,12 +87,13 @@ public class EventMapperService {
 
     public Event prepareForAdminUpdate(Event eventFromRepo, UpdateEventAdminRequest updateRequestDto) {
 
-        if (updateRequestDto.getEventDate()!= null && eventFromRepo.getPublishedOn() != null
+        if (updateRequestDto.getEventDate() != null && eventFromRepo.getPublishedOn() != null
             && !updateRequestDto.getEventDate().minusHours(1).isBefore(eventFromRepo.getPublishedOn())) {
             log.warn("Событие не может быть обновлено. Конфликт дат");
-            throw new EwmBadDataException("Изменяемое событие должно начинаться позже, чем через час после публикации!");
+            throw new EwmBadDataException(
+                "Изменяемое событие должно начинаться позже, чем через час после публикации!");
         }
-        if (updateRequestDto.getEventDate()!= null &&
+        if (updateRequestDto.getEventDate() != null &&
             updateRequestDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             log.warn("Событие не может быть обновлено. Конфликт дат");
             throw new EwmBadDataException("Начало события должно быть позже, чем через 2 часа от данного момента!");
@@ -104,7 +103,7 @@ public class EventMapperService {
             log.warn("Событие не может быть опубликовано. Конфликт состояния");
             throw new EwmConflictException("Опубликовать можно события в статусе ожидания публикации");
         }
-        if (updateRequestDto.getStateAction() !=null
+        if (updateRequestDto.getStateAction() != null
             && updateRequestDto.getStateAction().equals(StateActionAdmin.REJECT_EVENT)
             && eventFromRepo.getState().equals(EventState.PUBLISHED)
             || eventFromRepo.getState().equals(EventState.CANCELED)) {
@@ -127,85 +126,87 @@ public class EventMapperService {
         if (updateRequestDto.getPaid() != null && !eventFromRepo.getPaid().equals(updateRequestDto.getPaid())) {
             eventFromRepo.setPaid(updateRequestDto.getPaid());
         }
-        if (updateRequestDto.getEventDate() != null && !eventFromRepo.getEventDate().equals(updateRequestDto.getEventDate())){
+        if (updateRequestDto.getEventDate() != null &&
+            !eventFromRepo.getEventDate().equals(updateRequestDto.getEventDate())) {
             eventFromRepo.setEventDate(updateRequestDto.getEventDate());
         }
-        if (updateRequestDto.getAnnotation() != null && !eventFromRepo.getAnnotation().equals(updateRequestDto.getAnnotation())){
+        if (updateRequestDto.getAnnotation() != null &&
+            !eventFromRepo.getAnnotation().equals(updateRequestDto.getAnnotation())) {
             eventFromRepo.setAnnotation(updateRequestDto.getAnnotation());
         }
         if (updateRequestDto.getCategory() != null
-            && !eventFromRepo.getCategory().getId().equals(updateRequestDto.getCategory())){
+            && !eventFromRepo.getCategory().getId().equals(updateRequestDto.getCategory())) {
             eventFromRepo.setCategory(categoryRepo.findById(updateRequestDto.getCategory())
                 .orElseThrow(() -> new NotFoundException("Category id " + updateRequestDto.getCategory()
                     + "НЕ ОБНАРУЖЕНА!")));
         }
         if (updateRequestDto.getDescription() != null
-            && !eventFromRepo.getDescription().equals(updateRequestDto.getDescription())){
+            && !eventFromRepo.getDescription().equals(updateRequestDto.getDescription())) {
             eventFromRepo.setDescription(updateRequestDto.getDescription());
         }
-        if (updateRequestDto.getTitle() != null && !eventFromRepo.getTitle().equals(updateRequestDto.getTitle())){
+        if (updateRequestDto.getTitle() != null && !eventFromRepo.getTitle().equals(updateRequestDto.getTitle())) {
             eventFromRepo.setTitle(updateRequestDto.getTitle());
         }
         if (updateRequestDto.getLocation() != null
-            && !eventFromRepo.getLocation().equals(updateRequestDto.getLocation())){
+            && !eventFromRepo.getLocation().equals(updateRequestDto.getLocation())) {
             eventFromRepo.setLocation(updateRequestDto.getLocation());
         }
         if (updateRequestDto.getParticipantLimit() != null
-            && !eventFromRepo.getParticipantLimit().equals(updateRequestDto.getParticipantLimit())){
+            && !eventFromRepo.getParticipantLimit().equals(updateRequestDto.getParticipantLimit())) {
             eventFromRepo.setParticipantLimit(updateRequestDto.getParticipantLimit());
         }
         if (updateRequestDto.getRequestModeration() != null
-            && eventFromRepo.getRequestModeration() != updateRequestDto.getRequestModeration()){
+            && eventFromRepo.getRequestModeration() != updateRequestDto.getRequestModeration()) {
             eventFromRepo.setRequestModeration(updateRequestDto.getRequestModeration());
         }
 
-        log.info("ADMIN ACCESS. Event id {} ready for update", eventFromRepo.getId() );
+        log.info("ADMIN ACCESS. Event id {} ready for update", eventFromRepo.getId());
         return eventFromRepo;
 
     }
 
-     private Event updateFieldsWithoutState(Event eventFromRepo, UpdateEventUserRequest makeUpdate) {
+    private Event updateFieldsWithoutState(Event eventFromRepo, UpdateEventUserRequest makeUpdate) {
 
         if (makeUpdate.getPaid() != null && !eventFromRepo.getPaid().equals(makeUpdate.getPaid())) {
             eventFromRepo.setPaid(makeUpdate.getPaid());
         }
 
-        if (makeUpdate.getEventDate() != null && !eventFromRepo.getEventDate().equals(makeUpdate.getEventDate())){
+        if (makeUpdate.getEventDate() != null && !eventFromRepo.getEventDate().equals(makeUpdate.getEventDate())) {
             eventFromRepo.setEventDate(makeUpdate.getEventDate());
         }
 
-        if (makeUpdate.getAnnotation() != null && !eventFromRepo.getAnnotation().equals(makeUpdate.getAnnotation())){
+        if (makeUpdate.getAnnotation() != null && !eventFromRepo.getAnnotation().equals(makeUpdate.getAnnotation())) {
             eventFromRepo.setAnnotation(makeUpdate.getAnnotation());
         }
 
         if (makeUpdate.getCategory() != null
-            && !eventFromRepo.getCategory().getId().equals(makeUpdate.getCategory())){
+            && !eventFromRepo.getCategory().getId().equals(makeUpdate.getCategory())) {
 
             eventFromRepo.setCategory(categoryRepo.findById(makeUpdate.getCategory())
                 .orElseThrow(() -> new NotFoundException("Искомая категория не обнаружена")));
         }
 
         if (makeUpdate.getDescription() != null
-            && !eventFromRepo.getDescription().equals(makeUpdate.getDescription())){
+            && !eventFromRepo.getDescription().equals(makeUpdate.getDescription())) {
             eventFromRepo.setDescription(makeUpdate.getDescription());
         }
 
-        if (makeUpdate.getTitle() != null && !eventFromRepo.getTitle().equals(makeUpdate.getTitle())){
+        if (makeUpdate.getTitle() != null && !eventFromRepo.getTitle().equals(makeUpdate.getTitle())) {
             eventFromRepo.setTitle(makeUpdate.getTitle());
         }
 
         if (makeUpdate.getLocation() != null
-            && !eventFromRepo.getLocation().equals(makeUpdate.getLocation())){
+            && !eventFromRepo.getLocation().equals(makeUpdate.getLocation())) {
             eventFromRepo.setLocation(makeUpdate.getLocation());
         }
 
         if (makeUpdate.getParticipantLimit() != null
-            && !eventFromRepo.getParticipantLimit().equals(makeUpdate.getParticipantLimit())){
+            && !eventFromRepo.getParticipantLimit().equals(makeUpdate.getParticipantLimit())) {
             eventFromRepo.setParticipantLimit(makeUpdate.getParticipantLimit());
         }
 
         if (makeUpdate.getRequestModeration() != null
-            && eventFromRepo.getRequestModeration() != makeUpdate.getRequestModeration()){
+            && eventFromRepo.getRequestModeration() != makeUpdate.getRequestModeration()) {
             eventFromRepo.setRequestModeration(makeUpdate.getRequestModeration());
         }
 

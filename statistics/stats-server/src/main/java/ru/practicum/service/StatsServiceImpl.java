@@ -45,7 +45,7 @@ public class StatsServiceImpl implements StatsService {
             if (uris == null || uris.isEmpty()) {
                 return statsRepo.viewAllStatistics(start, end);
             } else {
-               return statsRepo.viewAllStatisticsWithUris(start, end, uris);
+                return statsRepo.viewAllStatisticsWithUris(start, end, uris);
             }
         }
     }

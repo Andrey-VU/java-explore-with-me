@@ -21,7 +21,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnprocessedException(final Throwable e) {
-        log.debug("Получен статус 500 Internal Server Error {}, {}",  e.getMessage(), e.getStackTrace());
+        log.debug("Получен статус 500 Internal Server Error {}, {}", e.getMessage(), e.getStackTrace());
         return new ErrorResponse(
             e.getMessage()
         );

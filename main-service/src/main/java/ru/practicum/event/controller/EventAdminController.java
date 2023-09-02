@@ -1,7 +1,6 @@
 package ru.practicum.event.controller;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
@@ -33,19 +32,22 @@ public class EventAdminController {
     List<EventFullDto> getAdmin(@RequestParam(required = false) List<User> users,
                                 @RequestParam(required = false) List<EventState> states,
                                 @RequestParam(required = false) List<Category> categories,
-                  @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
-                  @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
-                  @PositiveOrZero @RequestParam (required = false, defaultValue = "0") Integer from,
-                  @Positive @RequestParam (required = false, defaultValue = "10") Integer size) {
+                                @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT)
+                                LocalDateTime rangeStart,
+                                @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT)
+                                LocalDateTime rangeEnd,
+                                @PositiveOrZero @RequestParam(required = false, defaultValue = "0") Integer from,
+                                @Positive @RequestParam(required = false, defaultValue = "10") Integer size) {
 
-        List<EventFullDto> fullDtoList = eventService.getAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        List<EventFullDto> fullDtoList =
+            eventService.getAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
         log.info("Найдено {} событий", fullDtoList.size());
         return fullDtoList;
     }
 
     @PatchMapping("/{eventId}")
     EventFullDto updateAdmin(@Positive @PathVariable Long eventId,
-                             @Valid @RequestBody UpdateEventAdminRequest updateRequest){
+                             @Valid @RequestBody UpdateEventAdminRequest updateRequest) {
         return eventService.updateAdmin(eventId, updateRequest);
     }
 }

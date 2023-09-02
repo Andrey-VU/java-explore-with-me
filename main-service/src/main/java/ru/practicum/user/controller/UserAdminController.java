@@ -32,19 +32,21 @@ public class UserAdminController {
     }
 
     @GetMapping
-    public List<UserDto> getUsers(@RequestParam (required = false) List<Long> ids,
-                                  @Positive @RequestParam (required = false, defaultValue = "10") int size,
-                                  @PositiveOrZero @RequestParam (required = false, defaultValue = "0") int from){
+    public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
+                                  @Positive @RequestParam(required = false, defaultValue = "10") int size,
+                                  @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from) {
         log.info("STARTED Getting info about {} users with parameters: \n size {} \n from {}  ", ids.size(),
             size, from);
         List<UserDto> users = userService.getUsers(ids, size, from);
         return users;
-    };
+    }
+
+    ;
 
     @DeleteMapping("/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable("userId") Long userId) {
         log.info("deleteUser: {} userId - STARTED", userId);
         userService.delete(userId);
-        }
+    }
 }

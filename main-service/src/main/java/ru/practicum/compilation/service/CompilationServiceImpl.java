@@ -46,7 +46,8 @@ public class CompilationServiceImpl implements CompilationService {
     public void delete(Long compId) {
         Compilation compilation = compilationRepo.findById(compId)
             .orElseThrow(()
-                -> new NotFoundException("Невозможно удалить отсутствующую в базе данных подборку событий Id" + compId));
+                -> new NotFoundException(
+                "Невозможно удалить отсутствующую в базе данных подборку событий Id" + compId));
         compilationRepo.delete(compilation);
         log.info("Подборка событий id {} УДАЛЕНА", compId);
     }
@@ -76,7 +77,7 @@ public class CompilationServiceImpl implements CompilationService {
         List<EventShortDto> events = makeListWithEventShortDtos(compilation.getEvents());
         CompilationDto compilationDto = compilationMapper.makeDto(compilation, events);
         log.info("По Id {} найдена подборка c названием \"{}\" из {} событий", compId,
-                                                                               compilationDto.getTitle(), events.size());
+            compilationDto.getTitle(), events.size());
         return compilationDto;
     }
 
@@ -94,7 +95,8 @@ public class CompilationServiceImpl implements CompilationService {
         return compilationDto;
     }
 
-    private Compilation prepareForUpdateCompilation(Compilation compilation, UpdateCompilationRequest updateCompilationRequest) {
+    private Compilation prepareForUpdateCompilation(Compilation compilation,
+                                                    UpdateCompilationRequest updateCompilationRequest) {
         if (updateCompilationRequest.getPinned() != null)
             compilation.setPinned(updateCompilationRequest.getPinned());
         if (updateCompilationRequest.getEvents() != null) {
