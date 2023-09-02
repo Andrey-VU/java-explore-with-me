@@ -40,7 +40,6 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Long> ids, int size, int from) {
         List<UserDto> usersDto = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
@@ -59,20 +58,17 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserDto get(Long userId) {
         return userMapper.makeDto(userRepo.findById(userId)
             .orElseThrow( () -> new NotFoundException("User id " + userId + " is NOT FOUND!")));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public User getUserById(Long requesterId) {
         return userRepo.findById(requesterId)
             .orElseThrow(() -> new NotFoundException("Пользователь " + requesterId + " НЕ НАЙДЕН!"));
     }
 
-    @Transactional(readOnly = true)
     private void isUserNameFree(String name) {
         List<String> namesOfUsers = new ArrayList<>();
         for (User user : userRepo.findAll()) {

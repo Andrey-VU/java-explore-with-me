@@ -35,7 +35,6 @@ public class RequestServiceImpl implements RequestService{
     private final RequestMapper requestMapper;
 
     @Override
-    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено!"));
         userService.getUserById(userId);
@@ -65,7 +64,6 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requests = requestRepo.findAllById(requestsId);
         Long participants = getConfirmedRequests(event);
 
-        //статус можно изменить только у заявок, находящихся в состоянии ожидания (Ожидается код ошибки 409)
         if (requests.stream().filter(request -> !request.getStatus().equals(RequestState.PENDING)).count() > 0) {
             filterForRequestWithIncorrectStatus(requests, requestsId, userId, eventId, requestDto);
         }
@@ -77,7 +75,6 @@ public class RequestServiceImpl implements RequestService{
                 .map(request -> requestMapper.makeRequestDto(request)).collect(Collectors.toList()));
         }
 
-        //если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется
         if (!event.getRequestModeration() && event.getParticipantLimit() == 0) {
             requests.forEach(request -> request.setStatus(RequestState.CONFIRMED));
             requests.forEach(request -> requestRepo.save(request));
@@ -87,7 +84,6 @@ public class RequestServiceImpl implements RequestService{
                 .map(requestMapper::makeRequestDto).collect(Collectors.toList()), null);
         }
 
-        //нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие (Ожидается код ошибки 409)
         if (event.getParticipantLimit() <= participants){
             requests.forEach(request -> request.setStatus(RequestState.REJECTED));
             requests.forEach(request -> requestRepo.save(request));
@@ -95,8 +91,6 @@ public class RequestServiceImpl implements RequestService{
             throw new EwmConflictException("Достигнут лимит по заявкам");
         }
 
-
-        //если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить
         List<ParticipationRequestDto> requestDtoConfirmList = new ArrayList<>();
         List<ParticipationRequestDto> requestDtoRejectList = new ArrayList<>();
         int countForConfirm = (int) (event.getParticipantLimit() - participants);
@@ -183,7 +177,6 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getPrivate(Long requesterId) {
         List<ParticipationRequestDto> participationRequestDtoList = new ArrayList<>();
         participationRequestDtoList = requestRepo.findAllByRequesterId(requesterId).stream()
@@ -194,7 +187,6 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Long getConfirmedRequests(Event event) {
         List<Request> requests = requestRepo.findAllByEventId(event.getId());
         Long confirmedRequests = requests.stream()
@@ -204,7 +196,6 @@ public class RequestServiceImpl implements RequestService{
         return confirmedRequests;
     }
 
-    @Transactional(readOnly = true)
     private void requestValidation(User requester, Event event) {
         List<Request> requests = requestRepo.findAll();
 

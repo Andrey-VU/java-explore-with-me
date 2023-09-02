@@ -52,7 +52,6 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<CompilationDto> getAll(Boolean pinned, Integer from, Integer size) {
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
         List<Compilation> compilations;
@@ -71,7 +70,6 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public CompilationDto get(Long compId) {
         Compilation compilation = compilationRepo.findById(compId)
             .orElseThrow(() -> new NotFoundException("Не найдена подборка событий id" + compId));
@@ -117,7 +115,6 @@ public class CompilationServiceImpl implements CompilationService {
         return eventShortDtos;
     }
 
-    @Transactional(readOnly = true)
     private List<Event> makeListWithEvents(List<Long> events) {
         List<Event> eventsEntity = new ArrayList<>();
         if (events != null) {

@@ -56,7 +56,6 @@ public class CategoryServiceImpl implements CategoryService{
         return categoryMapper.makeDto(categoryFromRepo);
     }
 
-    @Transactional(readOnly = true)
     private void isNewNameFree(String name) {
         List<String> categoryNamesFromRepo = new ArrayList<>();
 
@@ -84,7 +83,6 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<CategoryDto> getPublic(int from, int size) {
         List<CategoryDto> categoryDtos = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
@@ -96,7 +94,6 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    @Transactional(readOnly = true)
     public CategoryDto getPublic(Long catId) {
         Category category = categoryRepo.findById(catId)
             .orElseThrow(() -> new NotFoundException("КАТЕГОРИЯ id "
@@ -106,7 +103,6 @@ public class CategoryServiceImpl implements CategoryService{
         return categoryMapper.makeDto(category);
     }
 
-    @Transactional(readOnly = true)
     private boolean isConnectedWithEvent(Long id) {
         if (eventRepo.findAll().stream()
             .filter(event -> event.getCategory().getId().equals(id)).count() > 0)

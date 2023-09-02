@@ -198,7 +198,6 @@ public class EventServiceImpl implements EventService{
     }
 
     @Override
-    @Transactional
     public EventFullDto getFullDtoEventPrivate(Long initiatorId, Long eventId) {
         Event eventFromRepo = eventRepo.findById(eventId)
             .orElseThrow(() -> new NotFoundException("Event Id " + eventId + "is NOT FOUND!"));
