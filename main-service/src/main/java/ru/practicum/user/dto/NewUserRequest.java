@@ -1,5 +1,6 @@
 package ru.practicum.user.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -10,7 +11,7 @@ import javax.validation.constraints.Size;
 
 @ToString
 @Getter
-@NoArgsConstructor
+@AllArgsConstructor
 public class NewUserRequest {
     @NotBlank(message = "Регистрация без имени невозможна!")
     @Size(min = 2, max = 250)

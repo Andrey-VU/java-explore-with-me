@@ -40,32 +40,31 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto update(Long id, NewCategoryDto newCategoryDto) {
-        Category categoryFromRepo = categoryRepo.getReferenceById(id);
+        Category categoryFromRepo = categoryRepo.findById(id).orElseThrow(
+            () -> new NotFoundException("Категория не обнаружена"));
 
-        isNewNameFree(newCategoryDto.getName());
-
-        if (newCategoryDto.getName().equals(categoryFromRepo.getName())) {
-            log.warn("Обновление для категории {} идентично сохранённому значению.\n" +
-                "Обновление не выполнено!", categoryFromRepo.getName());
-        } else {
-            String oldName = categoryFromRepo.getName();
+        String oldName = categoryFromRepo.getName();
+        if (!newCategoryDto.getName().equals(oldName)) {
+            isNewNameFree(newCategoryDto.getName());
             categoryFromRepo.setName(newCategoryDto.getName());
             categoryFromRepo = categoryRepo.save(categoryFromRepo);
             log.info("Имя \"{}\" категории id {} изменено на \"{}\"", oldName, id, categoryFromRepo.getName());
         }
+
         return categoryMapper.makeDto(categoryFromRepo);
     }
 
     private void isNewNameFree(String name) {
         List<String> categoryNamesFromRepo = new ArrayList<>();
 
-        for (Category category : categoryRepo.findAll()) {
-            categoryNamesFromRepo.add(category.getName());
-        }
-
-        if (categoryNamesFromRepo.contains(name)) {
-            log.warn("Нельзя присваивать категории не уникальное имя");
-            throw new EwmConflictException("Попытка присвоить категории уже существующее название");
+        if (!categoryRepo.findAll().isEmpty()) {
+            for (Category category : categoryRepo.findAll()) {
+                categoryNamesFromRepo.add(category.getName());
+            }
+            if (categoryNamesFromRepo.contains(name)) {
+                log.warn("Нельзя присваивать категории не уникальное имя");
+                throw new EwmConflictException("Попытка присвоить категории уже существующее название");
+            }
         }
     }
 

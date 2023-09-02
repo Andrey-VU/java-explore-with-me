@@ -71,12 +71,15 @@ public class UserServiceImpl implements UserService {
 
     private void isUserNameFree(String name) {
         List<String> namesOfUsers = new ArrayList<>();
-        for (User user : userRepo.findAll()) {
-            namesOfUsers.add(user.getName());
-        }
-        if (namesOfUsers.contains(name)) {
-            log.warn("попытка использовать занятое имя");
-            throw new EwmConflictException("Имя занято. Использовать повторно невозможно");
+
+        if (!userRepo.findAll().isEmpty()) {
+            for (User user : userRepo.findAll()) {
+                namesOfUsers.add(user.getName());
+            }
+            if (namesOfUsers.contains(name)) {
+                log.warn("попытка использовать занятое имя");
+                throw new EwmConflictException("Имя занято. Использовать повторно невозможно");
+            }
         }
     }
 }

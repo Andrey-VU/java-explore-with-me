@@ -35,7 +35,7 @@ public class UserAdminController {
     public List<UserDto> getUsers(@RequestParam(required = false) List<Long> ids,
                                   @Positive @RequestParam(required = false, defaultValue = "10") int size,
                                   @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from) {
-        log.info("STARTED Getting info about {} users with parameters: \n size {} \n from {}  ", ids.size(),
+        log.info("STARTED Getting info about {} users with parameters: \n size {} \n from {}  ", ids,
             size, from);
         List<UserDto> users = userService.getUsers(ids, size, from);
         return users;
