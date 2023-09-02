@@ -223,7 +223,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private void isUserTheInitiator(Long initiatorId, EventFullDto fullDto) {
-        if (initiatorId != fullDto.getInitiator().getId()) {
+        if (!initiatorId.equals(fullDto.getInitiator().getId())) {
             log.warn("Указанный Id {} не соответствует инициатору события {}", initiatorId, fullDto);
             throw new NotFoundException("Не найдено события c id " + fullDto.getId()
                 + ", инициированного пользователем c id" + initiatorId);

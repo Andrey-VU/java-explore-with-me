@@ -39,7 +39,7 @@ public class RequestServiceImpl implements RequestService {
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено!"));
         userService.getUserById(userId);
 
-        if (event.getInitiator().getId() != userId) {
+        if (!event.getInitiator().getId().equals(userId)) {
             log.warn("Пользователь id {} не является инициатором события id {}", userId, eventId);
             throw new NotFoundException("НЕ НАЙДЕНО событие id " + eventId + "у пользователя id " + userId);
         }
@@ -134,7 +134,7 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto cancelPrivate(Long requesterId, Long requestId) {
         Request request = requestRepo.findById(requestId)
             .orElseThrow(() -> new NotFoundException("Запрос id " + requestId + "НЕ НАЙДЕН!"));
-        if (request.getRequester().getId() != requesterId) {
+        if (!request.getRequester().getId().equals(requesterId)) {
             throw new NotFoundException("У пользователя id " + requesterId + " НЕ НАЙДЕН запрос id " + requestId);
         }
         request.setStatus(RequestState.CANCELED);
