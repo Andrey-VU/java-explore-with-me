@@ -22,13 +22,4 @@ public class EventShortDto {
     private String title;
     private Long views;
 
-//    {   "annotation": "Эксклюзивность нашего шоу гарантирует привлечение максимальной зрительской аудитории",
-//        "category": { "id": 1, "name": "Концерты"  },
-//        "confirmedRequests": 5,
-//        "eventDate": "2024-03-10 14:30:00",
-//        "id": 1,
-//        "initiator": { "id": 3, "name": "Фёдоров Матвей"  },
-//        "paid": true,
-//        "title": "Знаменитое шоу 'Летающая кукуруза'",
-//        "views": 999     },
 }

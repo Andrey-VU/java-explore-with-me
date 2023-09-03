@@ -18,7 +18,7 @@ import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.repo.RequestRepo;
 import ru.practicum.user.model.User;
-import ru.practicum.user.model.UserService;
+import ru.practicum.user.repo.UserRepo;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,14 +30,14 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final EventRepo eventRepo;
-    private final UserService userService;
+    private final UserRepo userRepo;
     private final RequestRepo requestRepo;
     private final RequestMapper requestMapper;
 
     @Override
     public List<ParticipationRequestDto> getRequestsListPrivate(Long userId, Long eventId) {
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено!"));
-        userService.getUserById(userId);
+        userRepo.countById(userId);
 
         if (!event.getInitiator().getId().equals(userId)) {
             log.warn("Пользователь id {} не является инициатором события id {}", userId, eventId);
@@ -58,7 +58,7 @@ public class RequestServiceImpl implements RequestService {
                                                                           EventRequestStatusUpdateRequest requestDto) {
 
         Event event = eventRepo.findById(eventId).orElseThrow(() -> new NotFoundException("Событие не найдено!"));
-        userService.getUserById(userId);
+        userRepo.countById(userId);
 
         List<Long> requestsId = requestDto.getRequestIds();
         List<Request> requests = requestRepo.findAllById(requestsId);
@@ -148,7 +148,7 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto createPrivate(Long requesterId, Long eventId) {
         Event event = eventRepo.findById(eventId).orElseThrow(()
             -> new NotFoundException("Событие Id " + eventId + " не найдено!"));
-        User user = userService.getUserById(requesterId);
+        User user = userRepo.findById(requesterId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         requestValidation(user, event);
 
         Request request = Request.builder()

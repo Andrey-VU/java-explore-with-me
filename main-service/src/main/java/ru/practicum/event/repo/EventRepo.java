@@ -16,15 +16,6 @@ public interface EventRepo extends JpaRepository<Event, Long> {
 
     List<Event> findAllByInitiatorId(Long userId, PageRequest pageRequest);
 
-//    @Query("SELECT e FROM Event e " +
-//        "WHERE (e.initiator.id IN (:users) OR :users IS NULL) " +
-//        "AND (e.state IN (:states) OR :states IS NULL) " +
-//        "AND (e.category.id IN (:categories) OR :categories IS NULL) " +
-//        "AND (e.eventDate BETWEEN :rangeStart AND :rangeEnd) " +
-//        "ORDER BY e.createdOn DESC")
-//    Page<Event> getEventsAdmin(List<Long> users, List<EventState> states, List<Long> categories,
-//                               LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
-
     @Query("SELECT e FROM Event e " +
         "WHERE ((LOWER(e.annotation) LIKE CONCAT('%',lower(:text),'%') " +
         "OR LOWER(e.description) LIKE CONCAT('%',lower(:text),'%')) " +

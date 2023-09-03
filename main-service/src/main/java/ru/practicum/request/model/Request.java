@@ -26,7 +26,6 @@ public class Request {
     private Long id;
 
     @JsonFormat(pattern = DATE_TIME_FORMAT)
-    @Column(name = "created")
     private LocalDateTime created;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -39,6 +38,5 @@ public class Request {
     @ToString.Exclude
     private User requester;
 
-    @Column(name = "status")
     private RequestState status;
 }

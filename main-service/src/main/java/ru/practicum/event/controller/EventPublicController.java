@@ -26,18 +26,8 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 public class EventPublicController {
     EventService eventService;
 
-    //сортировка списка событий должна быть организована либо по количеству просмотров,
-    // которое будет запрашиваться в сервисе статистики, либо по датам событий;
-    //при просмотре списка событий должна возвращаться только краткая информация о мероприятиях;
-    //просмотр подробной информации о конкретном событии нужно настроить отдельно (через отдельный эндпоинт);
-    //каждое событие должно относиться к какой-то из закреплённых в приложении категорий;
-    //должна быть настроена возможность получения всех имеющихся категорий и подборок событий
-    // (такие подборки будут составлять администраторы ресурса);
-    //каждый публичный запрос для получения списка событий или полной информации о мероприятии
-    // должен фиксироваться сервисом статистики.
-
     @GetMapping
-    List<EventFullDto> getEvents(@RequestParam(required = false) String text, //maxLength: 7000, minLength: 1
+    List<EventFullDto> getEvents(@RequestParam(required = false) String text,
                                  @RequestParam(required = false) Boolean paid,
                                  @RequestParam(required = false) List<Category> categories,
                                  @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT)

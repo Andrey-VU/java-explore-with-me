@@ -24,10 +24,9 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "annotation")
     private String annotation;
 
-    @ManyToOne//(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "category_id")
     @ToString.Exclude
     private Category category;
@@ -39,23 +38,21 @@ public class Event {
     @Column(name = "published")
     private LocalDateTime publishedOn;
 
-    @Column(name = "description")
     private String description;
 
     @Column(name = "event_date")
     private LocalDateTime eventDate;
 
-    @ManyToOne//(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "initiator_id")
     @ToString.Exclude
     private User initiator;
 
-    @ManyToOne//(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "location_id")
     @ToString.Exclude
     private Location location;
 
-    @Column(name = "paid")
     private Boolean paid;
 
     @Column(name = "participant_limit")
@@ -68,6 +65,5 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventState state;
 
-    @Column(name = "title")
     private String title;
 }

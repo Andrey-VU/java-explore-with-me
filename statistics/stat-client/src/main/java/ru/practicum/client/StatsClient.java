@@ -77,10 +77,6 @@ public class StatsClient extends BaseClient {
         return rest.exchange(uriBuilder.toString(), HttpMethod.GET, null, new ParameterizedTypeReference<>() {
         }, parameters);
     }
-//  ResponseEntity<List<EndpointHitResponseDto>> response = rest.exchange(getStatPath, HttpMethod.GET, null,
-//  new ParameterizedTypeReference<>() {
-//  }, parameters);
-
 
     private void validateInterval(LocalDateTime start, LocalDateTime end) {
         if (!start.isBefore(end)) {
