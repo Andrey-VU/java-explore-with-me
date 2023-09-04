@@ -4,18 +4,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.dto.EndpointHit;
-import ru.practicum.exception.ValidationException;
+import ru.practicum.dto.ViewStats;
+import ru.practicum.exception.EwmValidationException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 @Slf4j
+@Service
 public class StatsClient extends BaseClient {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -30,25 +36,27 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public void addStats(EndpointHit inputDto) {
+    public ResponseEntity<Object> addStats(EndpointHit inputDto) {
         log.info("StatsClient addStats: STARTED");
-        post("/hit", inputDto);
+        ResponseEntity<Object> responseEntity = post("/hit", inputDto);
+        return responseEntity;
     }
 
-    public ResponseEntity<Object> viewStatistics(LocalDateTime start, LocalDateTime end, Set<String> uris) {
+    public ResponseEntity<List<ViewStats>> viewStatistics(LocalDateTime start, LocalDateTime end, Set<String> uris) {
         return viewStatistics(start, end, uris, null);
     }
 
-    public ResponseEntity<Object> viewStatistics(LocalDateTime start, LocalDateTime end) {
+    public ResponseEntity<List<ViewStats>> viewStatistics(LocalDateTime start, LocalDateTime end) {
         return viewStatistics(start, end, null, null);
     }
 
-    public ResponseEntity<Object> viewStatistics(LocalDateTime start, LocalDateTime end, Boolean unique) {
+    public ResponseEntity<List<ViewStats>> viewStatistics(LocalDateTime start, LocalDateTime end, Boolean unique) {
         return viewStatistics(start, end, null, unique);
     }
 
-    public ResponseEntity<Object> viewStatistics(LocalDateTime start, LocalDateTime end,
-                                                 Set<String> uris, Boolean unique) {
+    public ResponseEntity<List<ViewStats>> viewStatistics(LocalDateTime start, LocalDateTime end,
+                                                          Set<String> uris, Boolean unique) {
+
         validateInterval(start, end);
 
         StringBuilder uriBuilder = new StringBuilder("/stats" + "?start={start}&end={end}");
@@ -66,12 +74,13 @@ public class StatsClient extends BaseClient {
             uriBuilder.append("&unique=").append(unique);
         }
 
-        return get(uriBuilder.toString(), parameters);
+        return rest.exchange(uriBuilder.toString(), HttpMethod.GET, null, new ParameterizedTypeReference<>() {
+        }, parameters);
     }
 
     private void validateInterval(LocalDateTime start, LocalDateTime end) {
         if (!start.isBefore(end)) {
-            throw new ValidationException("Начало интервала должно быть раньше его завершения!");
+            throw new EwmValidationException("Начало интервала должно быть раньше его завершения!");
         }
     }
 }
