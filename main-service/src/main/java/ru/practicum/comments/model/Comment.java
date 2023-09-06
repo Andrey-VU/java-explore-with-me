@@ -35,12 +35,16 @@ public class Comment {
 
     private String text;
 
-    @Column(name = "emo_reaction")
     @Enumerated(EnumType.STRING)
     private Reaction reaction;
+
+    @Enumerated(EnumType.STRING)
+    private CommentState state;
 
     private String proposal;
 
     @JsonFormat(pattern = DATE_TIME_FORMAT)
     private LocalDateTime created;
+
+    private Boolean isToxic = false;
 }

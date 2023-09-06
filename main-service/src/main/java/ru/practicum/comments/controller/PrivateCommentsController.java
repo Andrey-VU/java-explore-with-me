@@ -29,8 +29,27 @@ public class PrivateCommentsController {
                              @Valid @RequestBody NewCommentDto newCommentDto) {
         log.info("CREATE Comment for EVENT Id: {}, by USER {}  - Started", eventId, userId);
         CommentDto commentDto = commentService.create(userId, eventId, newCommentDto);
-        log.info("PRIVATE ACCESS. EVENT {} is CREATED", commentDto);
+        log.info("PRIVATE ACCESS. COMMENT {} is CREATED", commentDto.toString());
         return commentDto;
+    }
+
+    @PatchMapping
+    CommentDto update(@Positive @PathVariable Long commentId,
+                      @Positive @RequestParam Long userId,
+                      @Valid @RequestBody NewCommentDto newCommentDto){
+        log.info("UPDATE Comment for EVENT Id: {}, by USER {}  - Started", commentId, userId);
+        CommentDto commentDto = commentService.update(userId, commentId, newCommentDto);
+        log.info("PRIVATE ACCESS. Update {} is done", commentDto.toString());
+        return commentDto;
+    }
+
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteComment(@Positive @PathVariable Long commentId,
+                       @Positive @RequestParam Long userId){
+        log.info("Принят запрос на удаление комментария к событию {}", commentId);
+        commentService.delete(commentId);
     }
 
 }

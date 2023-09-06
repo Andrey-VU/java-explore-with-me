@@ -2,6 +2,8 @@ package ru.practicum.event.service;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
+import ru.practicum.comments.dto.CommentDto;
+import ru.practicum.comments.dto.query.QueryParamGetComments;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
@@ -32,4 +34,6 @@ public interface EventService {
     EventFullDto getFullDtoEventPrivate(Long userId, Long eventId);
 
     EventFullDto updatePrivate(Long userId, Long eventId, UpdateEventUserRequest updateForEvent);
+
+    List<CommentDto> getComments(QueryParamGetComments queryParams, Integer from, Integer size);
 }

@@ -6,6 +6,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
+import ru.practicum.comments.dto.CommentDto;
+import ru.practicum.comments.dto.query.QueryParamGetComments;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
@@ -220,6 +222,11 @@ public class EventServiceImpl implements EventService {
         Event updatedEvent = eventRepo.save(prepareForUpdate);
         log.info("PRIVATE ACCESS. {} - UPDATED", eventMapper.makeShortDto(updatedEvent));
         return eventMapper.makeFullDto(updatedEvent);
+    }
+
+    @Override
+    public List<CommentDto> getComments(QueryParamGetComments queryParams, Integer from, Integer size) {
+        return null;
     }
 
     private void isUserTheInitiator(Long initiatorId, EventFullDto fullDto) {

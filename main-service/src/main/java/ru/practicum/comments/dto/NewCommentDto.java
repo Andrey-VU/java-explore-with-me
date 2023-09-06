@@ -1,6 +1,7 @@
 package ru.practicum.comments.dto;
 
 import lombok.Data;
+import ru.practicum.comments.model.CommentState;
 import ru.practicum.comments.model.Reaction;
 
 import javax.validation.constraints.NotBlank;
@@ -16,4 +17,5 @@ public class NewCommentDto {
     private Reaction reaction;
     @Size(max = 500)
     private String proposal;
+    private CommentState commentState = CommentState.PENDING;
 }
