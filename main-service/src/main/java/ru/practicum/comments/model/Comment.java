@@ -17,6 +17,7 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 @EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "comments", schema = "public")
 public class Comment {
     @Id

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.comments.dto.CommentDto;
 import ru.practicum.comments.dto.query.QueryParamGetComments;
+import ru.practicum.comments.service.CommentService;
 import ru.practicum.event.service.EventService;
 
 import javax.validation.Valid;
@@ -20,9 +21,9 @@ import java.util.List;
 @RestController
 @Slf4j
 @AllArgsConstructor
-@RequestMapping(path = "admin/comments/events")
+@RequestMapping(path = "/comments/public")
 public class PublicCommentController {
-    EventService eventService;
+    CommentService commentService;
 
     @GetMapping
     List<CommentDto> getComments(@PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
@@ -31,6 +32,6 @@ public class PublicCommentController {
         log.info("Получен запрос на выгрузку комментариев: {}, " +
             " - from: {}\n" +
             " - size: {}\n", queryParams.toString(), from, size);
-        return eventService.getComments(queryParams, from, size);
-    };
+        return commentService.getComments(queryParams, from, size);
+    }
 }

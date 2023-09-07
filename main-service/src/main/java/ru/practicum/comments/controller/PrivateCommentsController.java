@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.comments.dto.CommentDto;
 import ru.practicum.comments.dto.NewCommentDto;
 import ru.practicum.comments.service.CommentService;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.NewEventDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
@@ -18,7 +16,7 @@ import javax.validation.constraints.Positive;
 @RestController
 @Slf4j
 @AllArgsConstructor
-@RequestMapping("/comments/{eventId}")
+@RequestMapping(path = "/comments/{eventId}")
 public class PrivateCommentsController {
     CommentService commentService;
 
@@ -29,7 +27,7 @@ public class PrivateCommentsController {
                              @Valid @RequestBody NewCommentDto newCommentDto) {
         log.info("CREATE Comment for EVENT Id: {}, by USER {}  - Started", eventId, userId);
         CommentDto commentDto = commentService.create(userId, eventId, newCommentDto);
-        log.info("PRIVATE ACCESS. COMMENT {} is CREATED", commentDto.toString());
+        log.info("PRIVATE ACCESS. COMMENT {} is CREATED", commentDto);
         return commentDto;
     }
 
@@ -38,8 +36,8 @@ public class PrivateCommentsController {
                       @Positive @RequestParam Long userId,
                       @Valid @RequestBody NewCommentDto newCommentDto){
         log.info("UPDATE Comment for EVENT Id: {}, by USER {}  - Started", commentId, userId);
-        CommentDto commentDto = commentService.update(userId, commentId, newCommentDto);
-        log.info("PRIVATE ACCESS. Update {} is done", commentDto.toString());
+        CommentDto commentDto = commentService.privateUpdate(userId, commentId, newCommentDto);
+        log.info("PRIVATE ACCESS. Update {} is done", commentDto);
         return commentDto;
     }
 
@@ -49,7 +47,7 @@ public class PrivateCommentsController {
     void deleteComment(@Positive @PathVariable Long commentId,
                        @Positive @RequestParam Long userId){
         log.info("Принят запрос на удаление комментария к событию {}", commentId);
-        commentService.delete(commentId);
+        commentService.privateDelete(commentId, userId);
     }
 
 }

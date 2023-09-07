@@ -15,4 +15,5 @@ public class CommentDto {
     private CommentState state;
     private String proposal;
     private LocalDateTime created;
+    private Boolean isEdited;
 }

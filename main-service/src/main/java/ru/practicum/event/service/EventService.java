@@ -34,6 +34,4 @@ public interface EventService {
     EventFullDto getFullDtoEventPrivate(Long userId, Long eventId);
 
     EventFullDto updatePrivate(Long userId, Long eventId, UpdateEventUserRequest updateForEvent);
-
-    List<CommentDto> getComments(QueryParamGetComments queryParams, Integer from, Integer size);
 }

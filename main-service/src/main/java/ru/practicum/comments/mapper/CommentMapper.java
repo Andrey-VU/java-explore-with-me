@@ -20,5 +20,6 @@ public interface CommentMapper {
     @Mapping(target = "event", source = "event")
     @Mapping(target = "author", source = "user")
     @Mapping(target = "id", expression = "java(null)")
+    @Mapping(target = "state", expression = "java(newCommentDto.getState())")
     Comment makeComment(NewCommentDto newCommentDto, User user, Event event, LocalDateTime created);
 }
