@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @AllArgsConstructor
-public class CommentServiceImpl implements CommentService{
+public class CommentServiceImpl implements CommentService {
     private final CommentRepo commentRepo;
     private final UserRepo userRepo;
     private final EventRepo eventRepo;
@@ -38,9 +38,6 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     public CommentDto create(Long userId, Long eventId, NewCommentDto newCommentDto) {
-        // проверить участвовал ли юзер в событии - 409
-        // оставить отзыв можно не раньше чем через 15 минут от начала события, но не позже 5 дней - 409
-        // инициатор не может писать отзыв на своё событие - 409
 
         User author = userRepo.findById(userId).orElseThrow(()
             -> new NotFoundException("Пользователь не найден. Id " + userId));
@@ -60,10 +57,6 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     public void adminModerate(CommentDto commentDto, Boolean isToxic) {
-        // при установленной "токсичности" комментария
-        // отменить его публикацию - выставить статус CANCELED
-        // в других случаях - установить статус PUBLISHED
-
         Comment comment = commentRepo.findById(commentDto.getId())
             .orElseThrow(() -> new NotFoundException("Комментарий не найден"));
         if (!isToxic) {
@@ -74,29 +67,32 @@ public class CommentServiceImpl implements CommentService{
     }
 
     @Override
-    public void privateDelete(Long commentId, Long userId) {
+    public void privateDelete(Long eventId, Long commentId, Long userId) {
+        eventRepo.countById(eventId);
         isUserAnAuthor(userId, commentId);
         Comment comment = commentRepo.findById(commentId).orElseThrow(
             () -> new NotFoundException("Комментарий не найден"));
         commentRepo.delete(comment);
-        log.info("Комментарий: {} успешно удалён по инициативе автора с Id {}",
-            comment.getText(), userId);
+        log.info("Комментарий Id:{} успешно удалён по инициативе автора с Id {}",
+            commentId, userId);
     }
 
     @Override
-    public CommentDto privateUpdate(Long userId, Long commentId, NewCommentDto newCommentDto) {
+    public CommentDto privateUpdate(Long userId, Long commentId, Long eventId, NewCommentDto newCommentDto) {
+
         Comment commentFromRepo = commentRepo.findById(commentId).orElseThrow(
             () -> new NotFoundException("Комментарий не найден"));
         isUserAnAuthor(userId, commentId);
 
-        Comment updatedComment = makePrivateUpdate(commentFromRepo, newCommentDto);
+        Event event = eventRepo.findById(eventId).orElseThrow(
+            () -> new NotFoundException("Событие не найдено"));
+
+        Comment updatedComment = makePrivateUpdate(event, commentFromRepo, newCommentDto);
+
         commentRepo.save(updatedComment);
         CommentDto commentDto = commentMapper.makeDto(updatedComment);
         commentDto.setIsEdited(true);
         log.info("Автор Id {} изменил свой комментарий: {}", userId, commentDto);
-
-        // После обновления комментарий опять должен уйти на модерацию админу
-        // на предмет токсичности
 
         return commentDto;
     }
@@ -145,6 +141,14 @@ public class CommentServiceImpl implements CommentService{
         return resultDtos;
     }
 
+    @Override
+    public CommentDto getComment(Long commentId) {
+        Comment comment = commentRepo.findById(commentId).orElseThrow(
+            () -> new NotFoundException("Комментарий не найден")
+        );
+        return commentMapper.makeDto(comment);
+    }
+
     private void isUserAnAuthor(Long userId, Long commentId) {
         if (commentRepo.countByIdAndAuthorId(commentId, userId) == 0) {
             throw new NotFoundException("Пользователь id " + userId + "не оставлял комментарий " + commentId);
@@ -154,10 +158,6 @@ public class CommentServiceImpl implements CommentService{
     private void isCommentPossible(User author, Event event) {
         if (event.getInitiator().equals(author))
             throw new EwmConflictException("Инициатор не может писать отзывы на свои события");
-        if (event.getEventDate().isAfter(LocalDateTime.now().plusMinutes(15)) ||
-            event.getEventDate().isBefore(LocalDateTime.now().minusDays(5)))
-            throw new EwmConflictException("Нельзя оставить отзыв раньше чем через 15 минут и позже чем через" +
-                " 5 дней от начала события ");
         if (requestRepo.findAllByEventId(event.getId()).stream()
             .filter(request -> request.getRequester().getId().equals(author.getId()))
             .filter(request -> request.getStatus().equals(RequestState.CONFIRMED))
@@ -165,11 +165,11 @@ public class CommentServiceImpl implements CommentService{
             throw new EwmConflictException("Нельзя написать отзыв если вы не участвовали в событии");
     }
 
-    private Comment makePrivateUpdate(Comment commentFromRepo, NewCommentDto patch) {
-        Comment commentAfterUpdate = new Comment();
+    private Comment makePrivateUpdate(Event event, Comment commentFromRepo, NewCommentDto patch) {
+        Comment commentAfterUpdate = commentFromRepo;
         commentAfterUpdate.setId(commentFromRepo.getId());
 
-        if (!patch.getProposal().isBlank() && patch.getProposal() != null) {
+        if (patch.getProposal() != null) {
             commentAfterUpdate.setProposal(patch.getProposal());
         }
         if (patch.getReaction() != null) {
@@ -178,6 +178,7 @@ public class CommentServiceImpl implements CommentService{
         if (!patch.getText().equals(commentFromRepo.getText())) {
             commentAfterUpdate.setText(patch.getText());
         }
+
         commentAfterUpdate.setState(CommentState.PENDING);
 
         return commentAfterUpdate;

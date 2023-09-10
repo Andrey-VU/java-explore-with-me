@@ -38,5 +38,6 @@ public class Request {
     @ToString.Exclude
     private User requester;
 
+    @Enumerated(EnumType.STRING)
     private RequestState status;
 }

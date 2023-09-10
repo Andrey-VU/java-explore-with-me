@@ -19,7 +19,7 @@ public class AdminCommentsController {
 
     @PatchMapping
     void adminModerateComment(@RequestBody CommentDto commentDto,
-                              @RequestParam (defaultValue = "false") Boolean isToxic) {
+                              @RequestParam(defaultValue = "false") Boolean isToxic) {
         log.info("Comment for EVENT Id: {}, принято на модерацию", commentDto.getEventId());
         commentService.adminModerate(commentDto, isToxic);
     }

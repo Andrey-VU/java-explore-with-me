@@ -11,10 +11,11 @@ public interface CommentService {
 
     void adminModerate(CommentDto commentDto, Boolean isToxic);
 
-    void privateDelete(Long commentId, Long userId);
+    void privateDelete(Long eventId, Long commentId, Long userId);
 
-    CommentDto privateUpdate(Long userId, Long commentId, NewCommentDto newCommentDto);
+    CommentDto privateUpdate(Long userId, Long commentId, Long eventId, NewCommentDto newCommentDto);
 
     List<CommentDto> getComments(QueryParamGetComments queryParams, Integer from, Integer size);
 
+    CommentDto getComment(Long commentId);
 }

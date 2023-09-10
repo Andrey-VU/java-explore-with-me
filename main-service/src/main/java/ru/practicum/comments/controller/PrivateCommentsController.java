@@ -31,23 +31,25 @@ public class PrivateCommentsController {
         return commentDto;
     }
 
-    @PatchMapping
-    CommentDto update(@Positive @PathVariable Long commentId,
+    @PatchMapping(path = "/{commentId}")
+    CommentDto update(@Positive @PathVariable Long eventId,
+                      @Positive @PathVariable Long commentId,
                       @Positive @RequestParam Long userId,
-                      @Valid @RequestBody NewCommentDto newCommentDto){
+                      @Valid @RequestBody NewCommentDto newCommentDto) {
         log.info("UPDATE Comment for EVENT Id: {}, by USER {}  - Started", commentId, userId);
-        CommentDto commentDto = commentService.privateUpdate(userId, commentId, newCommentDto);
+        CommentDto commentDto = commentService.privateUpdate(userId, commentId, eventId, newCommentDto);
         log.info("PRIVATE ACCESS. Update {} is done", commentDto);
         return commentDto;
     }
 
 
-    @DeleteMapping
+    @DeleteMapping(path = "/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void deleteComment(@Positive @PathVariable Long commentId,
-                       @Positive @RequestParam Long userId){
+    void deleteComment(@Positive @PathVariable Long eventId,
+                       @Positive @PathVariable Long commentId,
+                       @Positive @RequestParam Long userId) {
         log.info("Принят запрос на удаление комментария к событию {}", commentId);
-        commentService.privateDelete(commentId, userId);
+        commentService.privateDelete(eventId, commentId, userId);
     }
 
 }

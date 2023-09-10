@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 @Data
 public class NewCommentDto {
     @NotBlank(message = "поле text не может быть пустым")
-    @Size(min = 20, max = 252)
+    @Size(min = 10, max = 252)
     private String text;
     private Reaction reaction;
     @Size(max = 500)

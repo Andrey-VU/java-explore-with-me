@@ -2,8 +2,6 @@ package ru.practicum.event.service;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
-import ru.practicum.comments.dto.CommentDto;
-import ru.practicum.comments.dto.query.QueryParamGetComments;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.enums.EventState;
 import ru.practicum.event.enums.SortBy;
