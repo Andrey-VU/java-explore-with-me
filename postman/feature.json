@@ -1623,36 +1623,31 @@
 		},
 		{
 			"key": "uid1",
-			"value": "1"
+			"value": "135"
 		},
 		{
 			"key": "uid2",
-			"value": "2",
+			"value": "136",
 			"type": "string"
 		},
 		{
 			"key": "uid3",
-			"value": "3",
+			"value": "137",
 			"type": "string"
 		},
 		{
 			"key": "eid1",
-			"value": "1",
+			"value": "106",
 			"type": "string"
 		},
 		{
 			"key": "eid2",
-			"value": "2",
+			"value": "107",
 			"type": "string"
 		},
 		{
 			"key": "catid",
-			"value": "1",
-			"type": "string"
-		},
-		{
-			"key": "rid1",
-			"value": "",
+			"value": "120",
 			"type": "string"
 		},
 		{
