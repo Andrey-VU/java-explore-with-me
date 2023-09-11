@@ -24,6 +24,5 @@ public interface CommentRepo extends JpaRepository<Comment, Long> {
                                                                           LocalDateTime end, Reaction reaction,
                                                                           PageRequest pageRequest);
 
-    List<Comment> findByEventIdAndCreatedAfterAndCreatedBeforeAndReactionAndTextContainingIgnoreCase
-        (Long eventId, LocalDateTime start, LocalDateTime end, Reaction reaction, String text, PageRequest pageRequest);
+    List<Comment> findByEventIdAndCreatedAfterAndCreatedBeforeAndReactionAndTextContainingIgnoreCase(Long eventId, LocalDateTime start, LocalDateTime end, Reaction reaction, String text, PageRequest pageRequest);
 }

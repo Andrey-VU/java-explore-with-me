@@ -116,21 +116,17 @@ public class CommentServiceImpl implements CommentService {
         Long eventId = queryParams.getEventId();
 
         if (text == null && reaction == null) {
-            commentsFromRepo = commentRepo.findByEventIdAndCreatedAfterAndCreatedBefore
-                (eventId, start, end, pageRequest);
+            commentsFromRepo = commentRepo.findByEventIdAndCreatedAfterAndCreatedBefore(eventId, start, end, pageRequest);
         } else if (text != null && reaction != null) {
             commentsFromRepo
-                = commentRepo.findByEventIdAndCreatedAfterAndCreatedBeforeAndReactionAndTextContainingIgnoreCase
-                (eventId, start, end, reaction, text, pageRequest);
+                = commentRepo.findByEventIdAndCreatedAfterAndCreatedBeforeAndReactionAndTextContainingIgnoreCase(eventId, start, end, reaction, text, pageRequest);
         }
 
 
         if (text == null && reaction != null) {
-            commentsFromRepo = commentRepo.findByEventIdAndCreatedAfterAndCreatedBeforeAndReaction
-                (eventId, start, end, reaction, pageRequest);
+            commentsFromRepo = commentRepo.findByEventIdAndCreatedAfterAndCreatedBeforeAndReaction(eventId, start, end, reaction, pageRequest);
         } else if (text != null && reaction == null) {
-            commentsFromRepo = commentRepo.findByEventIdAndCreatedAfterAndCreatedBeforeAndTextContainingIgnoreCase
-                (eventId, start, end, text, pageRequest);
+            commentsFromRepo = commentRepo.findByEventIdAndCreatedAfterAndCreatedBeforeAndTextContainingIgnoreCase(eventId, start, end, text, pageRequest);
         }
 
         List<CommentDto> resultDtos = commentsFromRepo.stream()
