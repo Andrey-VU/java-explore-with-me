@@ -18,7 +18,7 @@ import javax.validation.constraints.Positive;
 @AllArgsConstructor
 @RequestMapping(path = "/comments/{eventId}")
 public class PrivateCommentsController {
-    CommentService commentService;
+    private final CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

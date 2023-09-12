@@ -14,8 +14,8 @@ import ru.practicum.comments.service.CommentService;
 @AllArgsConstructor
 @RequestMapping(path = "admin/comments")
 public class AdminCommentsController {
-    CommentService commentService;
-    CommentMapper commentMapper;
+    private final CommentService commentService;
+    private CommentMapper commentMapper;
 
     @PatchMapping
     void adminModerateComment(@RequestBody CommentDto commentDto,

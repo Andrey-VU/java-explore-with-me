@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping(path = "/comments/public")
 public class PublicCommentController {
-    CommentService commentService;
+    private final CommentService commentService;
 
     @GetMapping
     List<CommentDto> getComments(@PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
