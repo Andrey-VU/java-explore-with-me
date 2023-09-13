@@ -1,9 +1,8 @@
-package ru.practicum.request.model;
+package ru.practicum.comments.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import ru.practicum.event.model.Event;
-import ru.practicum.request.enums.RequestState;
 import ru.practicum.user.model.User;
 
 import javax.persistence.*;
@@ -16,28 +15,37 @@ import static ru.practicum.utils.MainConstants.DATE_TIME_FORMAT;
 @Getter
 @Setter
 @EqualsAndHashCode
-@Table(name = "requests", schema = "public")
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class Request {
+@NoArgsConstructor
+@Builder
+@Table(name = "comments", schema = "public")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JsonFormat(pattern = DATE_TIME_FORMAT)
-    private LocalDateTime created;
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "event_id")
     @ToString.Exclude
     private Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requester_id")
+    @ManyToOne
+    @JoinColumn(name = "author_id")
     @ToString.Exclude
-    private User requester;
+    private User author;
+
+    private String text;
 
     @Enumerated(EnumType.STRING)
-    private RequestState status;
+    private Reaction reaction;
+
+    @Enumerated(EnumType.STRING)
+    private CommentState state;
+
+    private String proposal;
+
+    @JsonFormat(pattern = DATE_TIME_FORMAT)
+    private LocalDateTime created;
+
+    private Boolean isToxic = false;
 }

@@ -48,4 +48,6 @@ public interface EventRepo extends JpaRepository<Event, Long> {
                                                                                    List<EventState> states,
                                                                                    List<Long> categoriesIds,
                                                                                    PageRequest pageRequest);
+
+    void countById(Long eventId);
 }
