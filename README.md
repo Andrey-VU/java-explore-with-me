@@ -1,4 +1,6 @@
 # java-explore-with-me
+Приложение электронная афиша
+
 Template repository for ExploreWithMe project.
 Ссылка на итоговый PullRequest:
 https://github.com/Andrey-VU/java-explore-with-me/pull/5
